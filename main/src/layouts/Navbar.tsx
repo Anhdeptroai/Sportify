@@ -6,13 +6,13 @@ const Navbar = () =>{
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
 
-    return <div className="flex item-center h-18 bg-black text-white">
+    return <div className="flex item-center h-[10%] bg-black text-white">
 
         <button className="fab fa-spotify  text-3xl ml-5" onClick={() => navigate("/")}></button>
         <button className="fas fa-house-chimney text-2xl ml-5" onClick={() => navigate("/")}></button>
 
         {/* Thanh Search */}
-        <div className="flex items-center bg-gray-900 rounded-full h-10 w-100 flex mt-4 ml-5 pl-5 hover:bg-gray-700 hover:text-white-200">
+            <div className="flex items-center bg-gray-900 rounded-full h-10 w-100 flex mt-4 ml-5 pl-5 hover:bg-gray-700 hover:text-white-200">
                 <FaSearch className="text-gray-400" />
                 <input
                     type="text"
@@ -39,6 +39,6 @@ const Navbar = () =>{
                     Đăng nhập
                 </button>
             </div>        
-        </div>
+    </div>
 }
 export default Navbar
