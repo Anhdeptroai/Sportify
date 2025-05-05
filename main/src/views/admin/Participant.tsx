@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllParticipant, postParticipant } from '../../adminApi/participantApi';
+import { getAllParticipant, postParticipant, putParticipant } from '../../adminApi/participantApi';
 import { getAllArtists } from '../../adminApi/artistApi';
 import { getAllSong } from '../../adminApi/songApi';
 
@@ -15,6 +15,8 @@ export default function Participant() {
     });
     const [artists, setArtists] = useState<any[]>([]);
     const [songs, setSongs] = useState<any[]>([]);
+    const [showEdit, setShowEdit] = useState(false);
+    const [editParticipant, setEditParticipant] = useState<any>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,7 +31,7 @@ export default function Participant() {
         getAllSong().then(setSongs);
     }, []);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setNewParticipant(prev => ({ ...prev, [name]: value }));
     };
@@ -49,6 +51,35 @@ export default function Participant() {
         } catch (e) {
             alert('Có lỗi khi thêm participant!');
         }
+    };
+
+    const handleEditClick = (participant: any) => {
+        setEditParticipant(participant);
+        setShowEdit(true);
+    };
+
+    const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        if (!editParticipant) return;
+        const { name, value } = e.target;
+        setEditParticipant({ ...editParticipant, [name]: value });
+    };
+
+    const handleEditSave = async () => {
+        if (!editParticipant) return;
+        try {
+            const updated = await putParticipant(editParticipant.id, editParticipant);
+            setParticipants(prev => prev.map(p => p.id === updated.id ? updated : p));
+            setShowEdit(false);
+            setEditParticipant(null);
+            alert('Cập nhật participant thành công!');
+        } catch (err) {
+            alert('Có lỗi khi cập nhật participant!');
+        }
+    };
+
+    const handleEditCancel = () => {
+        setShowEdit(false);
+        setEditParticipant(null);
     };
 
     // Filter users by Artist name
@@ -144,7 +175,7 @@ export default function Participant() {
             <th className="p-2 border">Role</th>
             <th className="p-2 border">Song_Id</th>
             <th className="p-2 border">Artist_Id</th>
-          
+            <th className="p-2 border">Actions</th>
           </tr>
         </thead>
         <tbody className="text-white">
@@ -157,11 +188,77 @@ export default function Participant() {
               <td className="p-2 border">{participant.role}</td>
               <td className="p-2 border">{participant.song}</td>
               <td className="p-2 border">{participant.artist}</td>
-
+              <td className="p-2 border">
+                <div className="flex gap-2 justify-center">
+                  <button
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                    onClick={() => handleEditClick(participant)}
+                  >
+                    Edit
+                  </button>
+                  <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
+                    Delete
+                  </button>
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {showEdit && editParticipant && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-lg p-8 w-full max-w-3xl shadow-lg relative">
+            <h2 className="text-xl font-bold mb-4 text-white">Edit Participant</h2>
+            <select
+              name="song"
+              value={editParticipant.song}
+              onChange={handleEditInputChange}
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Chọn song</option>
+              {songs.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+            </select>
+            <select
+              name="artist"
+              value={editParticipant.artist}
+              onChange={handleEditInputChange}
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Chọn artist</option>
+              {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+            <input
+              type="text"
+              name="role"
+              value={editParticipant.role}
+              onChange={handleEditInputChange}
+              placeholder="Role"
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={handleEditCancel}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSave}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold"
+              >
+                Save
+              </button>
+            </div>
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl"
+              onClick={handleEditCancel}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

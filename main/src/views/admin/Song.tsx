@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllSong, postSong } from '../../adminApi/songApi'; // Adjust the import path as necessary
+import { getAllSong, postSong, putSong } from '../../adminApi/songApi'; // Adjust the import path as necessary
 import type {Song, Participant } from '../../models/song';
 import { getAllAlbum } from '../../adminApi/albumApi'; // Adjust the import path as necessary
 
@@ -16,6 +16,8 @@ export default function Song() {
         audio_file: ''
     });
     const [albums, setAlbums] = useState<any[]>([]);
+    const [showEdit, setShowEdit] = useState(false);
+    const [editSong, setEditSong] = useState<any>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -58,6 +60,35 @@ export default function Song() {
         } catch (e) {
             alert('Có lỗi khi thêm bài hát!');
         }
+    };
+
+    const handleEditClick = (song: any) => {
+        setEditSong(song);
+        setShowEdit(true);
+    };
+
+    const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        if (!editSong) return;
+        const { name, value } = e.target;
+        setEditSong({ ...editSong, [name]: value });
+    };
+
+    const handleEditSave = async () => {
+        if (!editSong) return;
+        try {
+            const updated = await putSong(editSong.id, editSong);
+            setSongs(prev => prev.map(s => s.id === updated.id ? updated : s));
+            setShowEdit(false);
+            setEditSong(null);
+            alert('Cập nhật bài hát thành công!');
+        } catch (err) {
+            alert('Có lỗi khi cập nhật bài hát!');
+        }
+    };
+
+    const handleEditCancel = () => {
+        setShowEdit(false);
+        setEditSong(null);
     };
 
   return (
@@ -177,6 +208,83 @@ export default function Song() {
         </div>
       )}
 
+      {showEdit && editSong && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-lg p-8 w-full max-w-3xl shadow-lg relative">
+            <h2 className="text-xl font-bold mb-4 text-white">Edit Song</h2>
+            <input
+              type="text"
+              name="title"
+              value={editSong.title}
+              onChange={handleEditInputChange}
+              placeholder="Title"
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              name="album"
+              value={editSong.album}
+              onChange={handleEditInputChange}
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Chọn album</option>
+              {albums.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
+            </select>
+            <input
+              type="text"
+              name="duration"
+              value={editSong.duration}
+              onChange={handleEditInputChange}
+              placeholder="Duration"
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+              type="text"
+              name="gener"
+              value={editSong.gener}
+              onChange={handleEditInputChange}
+              placeholder="Gener"
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+              type="text"
+              name="image"
+              value={editSong.image}
+              onChange={handleEditInputChange}
+              placeholder="Image Path"
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+              type="text"
+              name="audio_file"
+              value={editSong.audio_file}
+              onChange={handleEditInputChange}
+              placeholder="Audio File Path"
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={handleEditCancel}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSave}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold"
+              >
+                Save
+              </button>
+            </div>
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl"
+              onClick={handleEditCancel}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       <table className="w-full table-auto border border-gray-500">
         <thead className=" bg-gray-700 text-white">
           <tr>
@@ -222,7 +330,10 @@ export default function Song() {
               <td className="p-2 border">{song.album}</td>
               <td className="p-2 border">
                 <div className="flex gap-2 justify-center">
-                  <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+                  <button
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                    onClick={() => handleEditClick(song)}
+                  >
                     Edit
                   </button>
                   <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">

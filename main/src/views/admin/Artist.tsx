@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { getAllArtists, postArtist } from '../../adminApi/artistApi'; // Adjust the import path as necessary
+import { getAllArtists, postArtist, putArtist } from '../../adminApi/artistApi'; // Adjust the import path as necessary
+import axios from 'axios';
 
 export default function Artist() {
   const [artists, setArtists] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
   const [newArtist, setNewArtist] = useState({ name: '', profile_picture: '', followers_count: 0, biography: '' });
+  const [showEdit, setShowEdit] = useState<boolean>(false);
+  const [editArtist, setEditArtist] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,11 +45,39 @@ export default function Artist() {
     }
   };
 
+  const handleEditClick = (artist: any) => {
+    setEditArtist(artist);
+    setShowEdit(true);
+  };
+
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!editArtist) return;
+    const { name, value } = e.target;
+    setEditArtist({ ...editArtist, [name]: name === 'followers_count' ? parseInt(value) : value });
+  };
+
+  const handleEditSave = async () => {
+    if (!editArtist) return;
+    try {
+      const updated = await putArtist(editArtist.id, editArtist);
+      setArtists(prev => prev.map(a => a.id === updated.id ? updated : a));
+      setShowEdit(false);
+      setEditArtist(null);
+      alert('Cập nhật nghệ sĩ thành công!');
+    } catch (err) {
+      alert('Có lỗi khi cập nhật nghệ sĩ!');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setShowEdit(false);
+    setEditArtist(null);
+  };
+
   const handleDelete = async (id: number) => {
     if (window.confirm("Bạn chắc chắn muốn xóa?")) {
       try {
-        // Gọi API xóa artist với id tương ứng
-        await fetch(`http://18.142.50.220:8000/api/artists/${id}`, { method: 'DELETE' });
+        await axios.delete(`http://18.142.50.220:8000/api/artists/${id}/`);
         // Cập nhật state sau khi xóa thành công
         setArtists(prev => prev.filter(artist => artist.id !== id));
         alert("Xóa thành công!");
@@ -137,24 +168,82 @@ export default function Artist() {
           </div>
         </div>
       )}
-      <table className="table-auto h-screen min-w[800px]  border border-gray-500">
+      {showEdit && editArtist && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-lg p-8 w-full max-w-3xl shadow-lg relative">
+            <h2 className="text-xl font-bold mb-4 text-white">Edit artist</h2>
+            <input
+              type="text"
+              name="name"
+              value={editArtist.name}
+              onChange={handleEditInputChange}
+              placeholder="Tên nghệ sĩ"
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+              type="text"
+              name="profile_picture"
+              value={editArtist.profile_picture}
+              onChange={handleEditInputChange}
+              placeholder="Đường dẫn hình ảnh"
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+              type="number"
+              name="followers_count"
+              value={editArtist.followers_count}
+              onChange={handleEditInputChange}
+              placeholder="Số lượng theo dõi"
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <textarea
+              name="biography"
+              value={editArtist.biography}
+              onChange={handleEditInputChange}
+              placeholder="Tiểu sử"
+              className="w-full mb-3 p-4 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 h-40"
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={handleEditCancel}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleEditSave}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold"
+              >
+                Lưu
+              </button>
+            </div>
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl"
+              onClick={handleEditCancel}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+      <table className="table-auto w-full border border-gray-500">
         <thead className=" bg-gray-700 text-white">
           <tr>
-            <th className="p-2 border">ID</th>
-            <th className="p-2 border">Name</th>
-            <th className="p-2 border">Profile picture</th>
-            <th className="p-2 border">Followers count</th>
-            <th className="p-2 border">Biography</th>
-            <th className="p-2 border">Actions</th>
+            <th className="p-4 border text-lg">ID</th>
+            <th className="p-4 border text-lg">Name</th>
+            <th className="p-4 border text-lg">Profile picture</th>
+            <th className="p-4 border text-lg">Followers count</th>
+            <th className="p-4 border text-lg">Biography</th>
+            <th className="p-4 border text-lg">Actions</th>
           </tr>
         </thead>
         <tbody className="text-white">
           {filteredArtists.map((artist, index) => (
             <tr key={index} className={index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-900'}>
-              <td className="p-2 border">{artist.id}</td>
-              <td className="p-2 border">{artist.name}</td>
+              <td className="p-4 border text-center">{artist.id}</td>
+              <td className="p-4 border text-center">{artist.name}</td>
               
-              <td className="p-2 border">
+              <td className="p-4 border">
                 <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
                   {artist.profile_picture ? (
                     <>
@@ -183,11 +272,14 @@ export default function Artist() {
                   )}
                 </div>
               </td>
-              <td className="p-2 border">{artist.followers_count}</td>
-              <td className="p-2 border">{artist.biography}</td>
-              <td className="p-2 border">
+              <td className="p-4 border text-center">{artist.followers_count}</td>
+              <td className="p-4 border text-center">{artist.biography}</td>
+              <td className="p-4 border">
                 <div className="flex gap-2 justify-center">
-                  <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+                  <button
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                    onClick={() => handleEditClick(artist)}
+                  >
                     Edit
                   </button>
                   <button 

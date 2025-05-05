@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllUsers, postUser } from '../../adminApi/userApi'; // Adjust the import path as necessary
+import { getAllUsers, postUser, putUser } from '../../adminApi/userApi'; // Adjust the import path as necessary
 import axios from 'axios';
 
 export default function User() {
@@ -15,6 +15,8 @@ export default function User() {
         followees_count: 0,
         subscription_type: ''
     });
+    const [editUser, setEditUser] = useState<any>(null);
+    const [showEditForm, setShowEditForm] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -62,6 +64,49 @@ export default function User() {
                 console.error('Error adding user:', error);
             }
         }
+    };
+
+    const handleEditClick = (user: any) => {
+        setEditUser({
+            ...user,
+            first_name: user.first_name ?? '',
+            last_name: user.last_name ?? '',
+            subscription_type: user.subscription_type ?? '',
+            profile_picture: user.profile_picture ?? '',
+            followees_count: user.followees_count ?? 0
+        });
+        setShowEditForm(true);
+    };
+
+    const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setEditUser((prev: any) => ({ ...prev, [name]: value }));
+    };
+
+    const handleEditSubmit = async () => {
+        try {
+            const updateData = {
+                email: editUser.email ?? '',
+                first_name: editUser.first_name ?? '',
+                last_name: editUser.last_name ?? '',
+                profile_picture: editUser.profile_picture ?? '',
+                followees_count: Number(editUser.followees_count) || 0,
+                subscription_type: editUser.subscription_type ?? ''
+            };
+            await putUser(editUser.id, updateData);
+            alert('Lưu user thành công!');
+            setShowEditForm(false);
+            setEditUser(null);
+            const userList = await getAllUsers();
+            setUsers(userList);
+        } catch (error) {
+            alert('Có lỗi khi cập nhật user!');
+        }
+    };
+
+    const handleEditCancel = () => {
+        setShowEditForm(false);
+        setEditUser(null);
     };
 
     return (
@@ -182,27 +227,40 @@ export default function User() {
                             <td className="p-2 border">{user.first_name || '—'}</td>
                             <td className="p-2 border">{user.last_name || '—'}</td>
                             <td className="p-2 border">
-                                <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+                                <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
                                     {user.profile_picture ? (
-                                        <img 
-                                            src={`http://18.142.50.220/msa/user${user.profile_picture}`} 
-                                            alt={`${user.first_name} ${user.last_name}`} 
-                                            className="w-full h-full"
-                                            style={{ objectFit: 'contain' }}
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.style.display = 'none';
-                                            }}
-                                        />
-                                    ) : null}
-                                    <span className="text-gray-400 text-xs text-center px-1">No Image</span>
+                                        <>
+                                            <img
+                                                src={`http://18.142.50.220/msa/user${user.profile_picture}`}
+                                                alt={`${user.first_name} ${user.last_name}`}
+                                                className="w-full h-full object-contain"
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    target.style.display = 'none';
+                                                    const parent = target.parentElement;
+                                                    if (parent) {
+                                                        const noImageText = parent.querySelector('.no-image-text');
+                                                        if (noImageText) {
+                                                            (noImageText as HTMLElement).style.display = 'block';
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                            <span className="text-gray-400 text-xs text-center px-1 no-image-text" style={{ display: 'none' }}>No Image</span>
+                                        </>
+                                    ) : (
+                                        <span className="text-gray-400 text-xs text-center px-1">No Image</span>
+                                    )}
                                 </div>
                             </td>
                             <td className="p-2 border">{user.followees_count}</td>
                             <td className="p-2 border">{user.subscription_type || '—'}</td>
                             <td className="p-2 border">
                                 <div className="flex gap-2 justify-center">
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+                                    <button
+                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                                        onClick={() => handleEditClick(user)}
+                                    >
                                         Edit
                                     </button>
                                     <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
@@ -214,6 +272,78 @@ export default function User() {
                     ))}
                 </tbody>
             </table>
+
+            {showEditForm && editUser && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                    <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg">
+                        <h3 className="text-lg mb-4 text-white">Edit User</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input
+                                type="text"
+                                name="email"
+                                placeholder="Email"
+                                value={editUser.email}
+                                onChange={handleEditInputChange}
+                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <input
+                                type="text"
+                                name="first_name"
+                                placeholder="First Name"
+                                value={editUser.first_name ?? ''}
+                                onChange={handleEditInputChange}
+                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <input
+                                type="text"
+                                name="last_name"
+                                placeholder="Last Name"
+                                value={editUser.last_name ?? ''}
+                                onChange={handleEditInputChange}
+                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <input
+                                type="text"
+                                name="profile_picture"
+                                placeholder="Profile Picture Path"
+                                value={editUser.profile_picture ?? ''}
+                                onChange={handleEditInputChange}
+                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <input
+                                type="number"
+                                name="followees_count"
+                                placeholder="Followees Count"
+                                value={editUser.followees_count ?? 0}
+                                onChange={handleEditInputChange}
+                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <input
+                                type="text"
+                                name="subscription_type"
+                                placeholder="Subscription Type"
+                                value={editUser.subscription_type ?? ''}
+                                onChange={handleEditInputChange}
+                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div className="mt-4 flex justify-end gap-2">
+                            <button
+                                onClick={handleEditCancel}
+                                className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEditSubmit}
+                                className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
