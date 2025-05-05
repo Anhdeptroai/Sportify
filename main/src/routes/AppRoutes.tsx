@@ -5,6 +5,7 @@ import Register from '../views/Register.tsx';
 import Artist from '../views/Artist.tsx';
 import Individual_artist from '../views/Individual_artist.tsx';
 import Song from "../views/Song.tsx"
+import Admin from "../views/admin/Admin.tsx";
 
 const AppRoutes = () => {
     return(
@@ -16,7 +17,9 @@ const AppRoutes = () => {
                 <Route path="/artist" element={<Artist />} />
                 <Route path="/artist/:id" element={<Individual_artist />} />
                 <Route path="/song/:id" element={<Song />} />
+                <Route path="/admin/Admin" element={<Admin />} />
                 <Route path="*" element={<h1>404 Not Found</h1>} />
+                
             </Routes>
         </Router>
     )
