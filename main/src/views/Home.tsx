@@ -9,9 +9,8 @@ function Home (){
         <div className="flex bg-black h-[80%] overflow-hidden">
           <Sidebar />
           <Content />
-        </div>  
+        </div>
         <Player />
-        <audio preload='auto'></audio>
     </>)
      
 }

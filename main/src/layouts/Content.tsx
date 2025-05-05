@@ -1,26 +1,33 @@
 import Footer from './Footer.tsx';
 import Song_item from '../components/song_item.tsx'
 import Artist_item from '../components/artist_item.tsx'
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from "react-router-dom";
+import Album_item from '../components/album_item.tsx'
+import { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import {Artist} from '../models/artist';
-import {Song} from '../models/song';
+import {Artist} from '../models/artist.tsx';
+import {Song} from '../models/song.tsx';
+import {Album} from '../models/album.tsx';
 
 
 const Content = () => {
     const navigate = useNavigate();
     const [artists, setArtists] = useState<Artist[]>([]);
     const [songs, setSongs] = useState<Song[]>([]);
+    const [albums, setAlbums] = useState<Album[]>([]);
 
     useEffect(() => {
         axios.get('http://18.142.50.220:8000/api/artists/')
             .then(res => setArtists(res.data))
-            .catch(err => console.error('Lỗi khi lấy danh sách bài hát:', err));
+            .catch(err => console.error('Lỗi khi lấy danh sách nghệ sĩ:', err));
 
         axios.get('http://18.142.50.220:8000/api/songs/')
             .then(res => setSongs(res.data))
             .catch(err => console.error("Lỗi khi lấy bài hát", err));
+
+        axios.get('http://18.142.50.220:8000/api/albums/')
+            .then(res => setAlbums(res.data))
+            .catch(err => console.error("Lỗi khi lấy album", err));
     }, []);
     
     if (artists.length === 0) return <p>Đang tải danh sách bài hát...</p>;
@@ -53,8 +60,32 @@ const Content = () => {
                 
                 <div className="p-6 text-white"> 
                     <div className="flex justify-between mb-3">
+                        <h2 className="text-2xl font-bold">Album phổ biến hiện nay</h2>
+                        <p className="mt-1" onClick={() => navigate("/album")}>Xem tất cả</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                        {albums.slice(0, 5).map((album, index) => {
+                            return (
+                                <Album_item 
+                                    key={index} 
+                                    id={album.id} 
+                                    title={album.title} 
+                                    description={album.description}
+                                    creation_date={album.creation_date}
+                                    publish_date={album.publish_date}
+                                    artist={album.artist}
+                                    songs={album.songs}
+                                />
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="p-6 text-white"> 
+                    <div className="flex justify-between mb-3">
                         <h2 className="text-2xl font-bold">Nhạc thịnh hành hiện nay</h2>
-                        <p className="mt-1" onClick={() => navigate("/artist")}>Xem tất cả</p>
+                        <p className="mt-1" onClick={() => navigate("/album")}>Xem tất cả</p>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
@@ -77,6 +108,7 @@ const Content = () => {
                         })}
                     </div>
                 </div>
+
                 <Footer />
             </div>
         </>

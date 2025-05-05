@@ -20,6 +20,8 @@ export type PlayerContextType = {
     playWithId: (id: number) => Promise<void>;
     previous: () => Promise<void>;
     next: () => Promise<void>;
+    loop: () => Promise<void>;
+    shuffle: () => Promise<void>;
     seekSong: (e: any) => void;
 };
 
@@ -30,9 +32,20 @@ const PlayerContextProvider: React.FC<React.PropsWithChildren> = ({children}) =>
 
     const [songs, setSongs] = useState<Song[]>([]);
 
+    // useEffect(() => {
+    //     axios.get('http://18.142.50.220:8000/api/songs/')
+    //         .then(res => setSongs(res.data))
+    //         .catch(err => console.error("Lỗi khi lấy bài hát", err));
+    // }, []);
+
     useEffect(() => {
         axios.get('http://18.142.50.220:8000/api/songs/')
-            .then(res => setSongs(res.data))
+            .then(res => {
+                setSongs(res.data);
+                if (res.data.length > 0 && !track) {
+                    setTrack(res.data[0]); // Gán bài đầu tiên
+                }
+            })
             .catch(err => console.error("Lỗi khi lấy bài hát", err));
     }, []);
 
@@ -40,7 +53,9 @@ const PlayerContextProvider: React.FC<React.PropsWithChildren> = ({children}) =>
     const seekBar = useRef<HTMLHRElement>(null);
     const seekBg = useRef<HTMLDivElement>(null);
 
-    const [track, setTrack] = useState(songs[0]);
+    // const [track, setTrack] = useState(songs[0]);
+    const [track, setTrack] = useState<Song | undefined>(undefined);
+
     const [playStatus, setPlayStatus] = useState(false);
     const [time, setTime] = useState({
         currentTime: { seconds: 0, minutes: 0 },
@@ -64,7 +79,7 @@ const PlayerContextProvider: React.FC<React.PropsWithChildren> = ({children}) =>
     };
 
     const previous = async () => {
-        if (track.id > 0) {
+        if (track && track.id > 0) {
         await setTrack(songs[track.id - 1]);
         await audioRef.current?.play();
         setPlayStatus(true);
@@ -72,19 +87,38 @@ const PlayerContextProvider: React.FC<React.PropsWithChildren> = ({children}) =>
     };
 
     const next = async () => {
-        if (track.id < songs.length - 1) {
+        if (track && track.id < songs.length - 1) {
         await setTrack(songs[track.id + 1]);
         await audioRef.current?.play();
         setPlayStatus(true);
         }
     };
 
-    const seekSong = async (e: any) => {
+    const seekSong = (e: React.MouseEvent<HTMLDivElement>) => {
         if (seekBg.current && audioRef.current) {
-        audioRef.current.currentTime =
-            (e.navigate.offsetX / seekBg.current.offsetWidth) * audioRef.current.duration;
+            const rect = seekBg.current.getBoundingClientRect(); // lấy vị trí & width
+            const offsetX = e.clientX - rect.left; // vị trí bạn click trên thanh
+            const percent = offsetX / rect.width; // tỉ lệ phần trăm
+            const newTime = percent * audioRef.current.duration; // thời gian tương ứng
+    
+            audioRef.current.currentTime = newTime; // tua tới vị trí đó
         }
     };
+
+    const loop = async () => {
+        if (track) {
+            await setTrack(songs[track.id-2]);
+            await audioRef.current?.play();
+            setPlayStatus(true);
+        }
+    };
+
+    const shuffle = async () => {
+        const shuffledSongs = songs.sort(() => Math.random() - 0.5);
+        await setTrack(shuffledSongs[0]);
+        await audioRef.current?.play();
+        setPlayStatus(true);
+    }
 
     useEffect(() => {
         setTimeout(() => {
@@ -94,14 +128,14 @@ const PlayerContextProvider: React.FC<React.PropsWithChildren> = ({children}) =>
                 seekBar.current.style.width =
                 Math.floor((audioRef.current.currentTime / audioRef.current.duration) * 100) + '%';
                 setTime({
-                currentTime: {
-                    seconds: Math.floor(audioRef.current.currentTime % 60),
-                    minutes: Math.floor(audioRef.current.currentTime / 60),
-                },
-                totalTime: {
-                    seconds: Math.floor(audioRef.current.duration % 60),
-                    minutes: Math.floor(audioRef.current.duration / 60),
-                },
+                    currentTime: {
+                        seconds: Math.floor(audioRef.current.currentTime % 60),
+                        minutes: Math.floor(audioRef.current.currentTime / 60),
+                    },
+                    totalTime: {
+                        seconds: Math.floor(audioRef.current.duration % 60),
+                        minutes: Math.floor(audioRef.current.duration / 60),
+                    },
                 });
             }
             };
@@ -124,6 +158,8 @@ const PlayerContextProvider: React.FC<React.PropsWithChildren> = ({children}) =>
         playWithId,
         previous,
         next,
+        loop,
+        shuffle,
         seekSong,
     };
 
