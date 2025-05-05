@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import clock_icon from '../assets/image/clock_icon.png';
+import imgDefault from '../assets/image/img1.jpg';
 import { PlayerContext } from '../controllers/context.tsx';
 import { PlaylistContext } from '../controllers/playlistContext.tsx';
 import Footer from '../layouts/Footer.tsx';
@@ -94,8 +95,8 @@ const PlaylistView = () => {
                         <>
                             <div className="mt-10 flex gap-8 flex-col md:flex-row md:item-end ml-8 mr-8">
                                 <img 
-                                    className="w-48 rounded" 
-                                    src={songs[0]?.image ? `http://18.142.50.220/msa/track_img/${songs[0].image}` : ''} 
+                                    className="w-48 h-48 object-cover rounded shadow-lg" 
+                                    src={songs[0]?.image ? `http://18.142.50.220/msa/track_img/${songs[0].image}` : imgDefault} 
                                     alt="Playlist cover" 
                                 />
                                 <div className="flex flex-col">

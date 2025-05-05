@@ -1,14 +1,24 @@
-import Sidebar from '../layouts/Sidebar.tsx';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { FaPlay } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import img1 from '../assets/image/img1.jpg';
+import img10 from '../assets/image/img10.jpg';
+import img2 from '../assets/image/img2.jpg';
+import img3 from '../assets/image/img3.jpg';
+import img4 from '../assets/image/img4.jpg';
+import img5 from '../assets/image/img5.jpg';
+import img6 from '../assets/image/img6.jpg';
+import img7 from '../assets/image/img7.jpg';
+import img8 from '../assets/image/img8.jpg';
+import img9 from '../assets/image/img9.jpg';
 import Footer from '../layouts/Footer.tsx';
 import Navbar from '../layouts/Navbar.tsx';
-import { useEffect, useState } from 'react';
-import { useNavigate } from "react-router-dom";
-import axios from 'axios';
-import {Artist} from '../models/artist';
 import Player from '../layouts/Player.tsx';
-import { FaPlay } from "react-icons/fa";
+import Sidebar from '../layouts/Sidebar.tsx';
+import { Artist } from '../models/artist';
 
-
+const defaultImages = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
 
 function Artists (){
 
@@ -36,7 +46,12 @@ function Artists (){
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                         {artists.map((artist, index) => {
-                            const profilePictureUrl = `http://18.142.50.220/msa/artist/${artist.profile_picture}`;
+                            let profilePictureUrl = '';
+                            if (artist.profile_picture && artist.profile_picture !== "null" && artist.profile_picture !== "") {
+                                profilePictureUrl = `http://18.142.50.220/msa/artist/${artist.profile_picture}`;
+                            } else {
+                                profilePictureUrl = defaultImages[index % defaultImages.length];
+                            }
                             return(
                                 <div key={artist.id} className="bg-gray-800 items-center rounded-lg justify-center hover:bg-gray-700 p-4" 
                                 onClick={() => navigate(`/artist/${artist.id}`)}>

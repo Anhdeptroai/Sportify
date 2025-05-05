@@ -92,14 +92,14 @@ const Register = () => {
     try {
       // Chuẩn bị dữ liệu gửi lên server
       const registerData = {
-        username: formData.username,
         email: formData.email,
         password: formData.password,
+        // Có thể thêm các trường khác nếu backend yêu cầu
       };
 
       // Gọi API đăng ký
       const response = await axios.post(
-        "http://18.142.50.220:8000/api/register/",
+        "http://18.142.50.220:8000/api/users/",
         registerData,
         {
           headers: {
@@ -109,20 +109,12 @@ const Register = () => {
       );
 
       if (response.data) {
-        // Xử lý response thành công
         toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-        // Lưu thông tin user nếu cần
-        localStorage.setItem('user', JSON.stringify(response.data));
-        // Chuyển hướng về trang login
         navigate("/login");
       }
     } catch (error: any) {
-      // Xử lý các lỗi từ server
       if (error.response) {
         const errorData = error.response.data;
-        if (errorData.username) {
-          setErrors(prev => ({ ...prev, username: errorData.username[0] }));
-        }
         if (errorData.email) {
           setErrors(prev => ({ ...prev, email: errorData.email[0] }));
         }
@@ -135,10 +127,8 @@ const Register = () => {
           toast.error("Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
         }
       } else if (error.request) {
-        // Không nhận được response từ server
         toast.error("Không thể kết nối đến server. Vui lòng thử lại sau.");
       } else {
-        // Lỗi khác
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
       }
     } finally {
