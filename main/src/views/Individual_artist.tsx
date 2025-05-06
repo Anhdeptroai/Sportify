@@ -90,7 +90,7 @@ const Individual_artist = () => {
                             const songAlbum = getAlbumBySong(song);
                             return(
                                 <div key={index} className="grid grid-cols-3 sm:grid-cols-4 mt-10 mb-4 pl-8 text-[#a7a7a7]"
-                                    onClick={() => {navigate(`/song/${song.id}`); playWithId(song.id-2);}}>
+                                    onClick={() => {navigate(`/song/${song.id}`); playWithId(song.id);}}>
                                     <p className='flex gap-2'>
                                         <b>{index + 1}</b>
                                         <img className="w-10" src={picture_song} alt="" />

@@ -34,8 +34,17 @@ const Playlist: React.FC = () => {
         setPlaylistSongs(songs);
     };
 
-    const handlePlaySong = (songId: number) => {
-        playWithId(songId);
+    const handlePlaySong = async (songId: number) => {
+        try {
+            if (!songId) {
+                console.error("ID bài hát không hợp lệ");
+                return;
+            }
+
+            await playWithId(songId);
+        } catch (error) {
+            console.error("Lỗi khi phát nhạc:", error);
+        }
     };
 
     return (

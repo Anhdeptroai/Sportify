@@ -7,9 +7,9 @@ import Footer from '../layouts/Footer.tsx';
 import Navbar from '../layouts/Navbar.tsx';
 import Player from '../layouts/Player.tsx';
 import Sidebar from '../layouts/Sidebar.tsx';
+import { Album } from '../models/album.tsx';
 import { Artist } from '../models/artist.tsx';
 import { Song } from '../models/song.tsx';
-import {Album} from '../models/album.tsx';
 
 const Detailed_album = () => {
 
@@ -18,17 +18,18 @@ const Detailed_album = () => {
     const [songs, setSongs] = useState<Song[]>([]);
     const [albums, setAlbums] = useState<Album[]>([]);
     const {playWithId} = useContext(PlayerContext);
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
-        axios.get('http://18.142.50.220:8000/api/artists/')
+        axios.get('http://18.142.50.220:8000/api/artists/', { headers: { Authorization: `Bearer ${token}` } })
             .then(res => setArtists(res.data))
             .catch(err => console.error('Lỗi khi lấy danh sách bài hát:', err));
 
-        axios.get('http://18.142.50.220:8000/api/songs/')
+        axios.get('http://18.142.50.220:8000/api/songs/', { headers: { Authorization: `Bearer ${token}` } })
             .then(res => setSongs(res.data))
             .catch(err => console.error("Lỗi khi lấy bài hát", err));
 
-        axios.get('http://18.142.50.220:8000/api/albums/')
+        axios.get('http://18.142.50.220:8000/api/albums/', { headers: { Authorization: `Bearer ${token}` } })
             .then(res => setAlbums(res.data))
             .catch(err => console.error("Lỗi khi lấy bài hát", err));
         }, []);
@@ -77,7 +78,7 @@ const Detailed_album = () => {
                             const picture_song = `http://18.142.50.220/msa/track_img/${song.image}`;
                             return(
                                 <div key={index} className="grid grid-cols-3 sm:grid-cols-4 mt-10 mb-4 pl-8 text-[#a7a7a7]"
-                                    onClick={() => {navigate(`/song/${song.id}`); playWithId(song.id-2);}}>
+                                    onClick={() => {navigate(`/song/${song.id}`); playWithId(song.id);}}>
                                     <p className='flex gap-5'>
                                         <b>{index + 1}</b>
                                         <img className="w-10" src={picture_song} alt="" />

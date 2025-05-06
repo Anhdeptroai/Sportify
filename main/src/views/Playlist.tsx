@@ -85,15 +85,37 @@ const PlaylistView = () => {
 
     const handlePlaySong = async (song: Song) => {
         try {
-            setTrack(song);
-            if (audioRef.current) {
-                audioRef.current.src = `http://18.142.50.220/msa/track/${song.audio_file}`;
-                await audioRef.current.load();
+            // Kiểm tra song có tồn tại không
+            if (!song) {
+                console.error("Không tìm thấy bài hát");
+                toast.error("Không tìm thấy bài hát");
+                return;
+            }
+
+            // Cập nhật track hiện tại
+            await setTrack(song);
+
+            // Kiểm tra audioRef có tồn tại không
+            if (!audioRef.current) {
+                console.error("Audio element không tồn tại");
+                toast.error("Không thể phát nhạc");
+                return;
+            }
+
+            // Cập nhật source và load audio
+            audioRef.current.src = `http://18.142.50.220/msa/track/${song.audio_file}`;
+            await audioRef.current.load();
+
+            // Thử phát nhạc
+            try {
                 await audioRef.current.play();
+            } catch (error) {
+                console.error("Lỗi khi phát nhạc:", error);
+                toast.error("Không thể phát bài hát này");
             }
         } catch (error) {
-            console.error("Lỗi khi phát nhạc:", error);
-            toast.error("Không thể phát bài hát này");
+            console.error("Lỗi khi xử lý bài hát:", error);
+            toast.error("Có lỗi xảy ra khi phát nhạc");
         }
     };
 

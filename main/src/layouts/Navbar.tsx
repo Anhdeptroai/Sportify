@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaKey, FaSearch, FaSignOutAlt, FaTimes, FaUser, FaUserEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -19,12 +19,14 @@ function parseJwt(token: string) {
 const Navbar = () => {
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
+    const [results, setResults] = useState<{artists: any[], songs: any[]}>({artists: [], songs: []});
     const [isLoggedIn, setIsLoggedIn] = useState(() => {
         const token = localStorage.getItem('token');
         return !!token;
     });
     const [userName, setUserName] = useState(() => localStorage.getItem('userName') || "");
     const [showDropdown, setShowDropdown] = useState(false);
+    const searchInputRef = React.useRef<HTMLInputElement>(null);
 
     // Lấy thông tin user từ API
     const fetchUserName = async (userId: number, token: string) => {
@@ -82,39 +84,103 @@ const Navbar = () => {
         navigate('/login');
     };
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!isLoggedIn) {
-            alert('Vui lòng đăng nhập để tìm kiếm bài hát');
-            navigate('/login');
+    useEffect(() => {
+        if (search.trim() === '') {
+            setResults({artists: [], songs: []});
+            setShowDropdown(false);
             return;
         }
-        // Handle search logic here
-        console.log('Searching for:', search);
+        // Gọi API tìm kiếm nghệ sĩ và bài hát
+        const fetchResults = async () => {
+            try {
+                const [artistRes, songRes] = await Promise.all([
+                    axios.get(`http://18.142.50.220:8000/api/artists/?search=${search}`),
+                    axios.get(`http://18.142.50.220:8000/api/songs/?search=${search}`)
+                ]);
+                setResults({
+                    artists: artistRes.data,
+                    songs: songRes.data
+                });
+                setShowDropdown(true);
+            } catch (err) {
+                setResults({artists: [], songs: []});
+                setShowDropdown(false);
+            }
+        };
+        fetchResults();
+    }, [search]);
+
+    const handleSelect = (type: 'artist' | 'song', id: number) => {
+        setShowDropdown(false);
+        setSearch('');
+        if (type === 'artist') {
+            navigate(`/artist/${id}`);
+        } else {
+            navigate(`/song/${id}`);
+        }
     };
 
     return (
-        <div className="flex items-center justify-between h-[54px] bg-black text-white px-4 w-full">
+        <div className="flex items-center justify-between h-[54px] bg-black text-white px-4 w-full relative">
             <div className="flex items-center gap-2">
                 <button className="fab fa-spotify text-3xl" onClick={() => navigate("/")}></button>
                 <button className="fas fa-house-chimney text-2xl ml-2" onClick={() => navigate("/")}></button>
             </div>
 
             {/* Search Bar */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-8">
-                <div className="flex items-center bg-gray-900 rounded-full h-10 hover:bg-gray-700">
+            <form onSubmit={(e) => { e.preventDefault(); }} className="flex-1 max-w-2xl mx-8 relative">
+                <div className="flex items-center bg-gray-900 rounded-full h-10 hover:bg-gray-700 relative">
                     <FaSearch className="text-gray-400 ml-4" />
                     <input
+                        ref={searchInputRef}
                         type="text"
                         className="bg-transparent outline-none px-4 text-white w-full"
                         placeholder="Tìm kiếm bài hát, nghệ sĩ..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
+                        onFocus={() => { if (results.artists.length || results.songs.length) setShowDropdown(true); }}
+                        onBlur={() => setShowDropdown(false)}
                     />
                     {search && (
                         <button type="button" onClick={() => setSearch("")} className="text-gray-400 mr-4">
                             <FaTimes />
                         </button>
+                    )}
+                    {/* Dropdown search results */}
+                    {showDropdown && (results.artists.length > 0 || results.songs.length > 0) && (
+                        <div
+                            className="absolute left-0 top-12 w-full bg-white text-black rounded shadow z-50 max-h-60 overflow-y-auto border border-gray-200"
+                            style={{ minWidth: '250px' }}
+                        >
+                            {results.artists.length > 0 && (
+                                <div>
+                                    <div className="px-4 py-2 font-bold border-b">Nghệ sĩ</div>
+                                    {results.artists.map(artist => (
+                                        <div
+                                            key={`artist-${artist.id}`}
+                                            className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                            onMouseDown={() => handleSelect('artist', artist.id)}
+                                        >
+                                            {artist.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {results.songs.length > 0 && (
+                                <div>
+                                    <div className="px-4 py-2 font-bold border-b">Bài hát</div>
+                                    {results.songs.map(song => (
+                                        <div
+                                            key={`song-${song.id}`}
+                                            className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                            onMouseDown={() => handleSelect('song', song.id)}
+                                        >
+                                            {song.title}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
             </form>

@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { PlaylistContext } from '../controllers/playlistContext';
@@ -10,7 +10,49 @@ function Sidebar() {
     const [playlistName, setPlaylistName] = useState('');
     const [creating, setCreating] = useState(false);
     const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [messages, setMessages] = useState<Array<{text: string, isBot: boolean}>>([]);
+    const [inputMessage, setInputMessage] = useState('');
+    const messagesEndRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
+
+    // Auto scroll to bottom when new messages arrive
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    const handleSendMessage = () => {
+        if (!inputMessage.trim()) return;
+        
+        // Add user message
+        setMessages(prev => [...prev, { text: inputMessage, isBot: false }]);
+        
+        // Simulate bot response
+        setTimeout(() => {
+            const botResponse = getBotResponse(inputMessage);
+            setMessages(prev => [...prev, { text: botResponse, isBot: true }]);
+        }, 500);
+        
+        setInputMessage('');
+    };
+
+    const getBotResponse = (message: string): string => {
+        const lowerMessage = message.toLowerCase();
+        
+        if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('chào')) {
+            return 'Xin chào! Tôi có thể giúp gì cho bạn?';
+        }
+        if (lowerMessage.includes('playlist') || lowerMessage.includes('danh sách')) {
+            return 'Bạn có thể tạo playlist mới bằng cách nhấn vào nút + ở góc phải trên cùng.';
+        }
+        if (lowerMessage.includes('xóa') || lowerMessage.includes('delete')) {
+            return 'Để xóa playlist, hãy nhấn vào nút Xóa bên cạnh playlist đó.';
+        }
+        if (lowerMessage.includes('cảm ơn') || lowerMessage.includes('thanks')) {
+            return 'Không có gì! Rất vui được giúp đỡ bạn.';
+        }
+        
+        return 'Xin lỗi, tôi không hiểu câu hỏi của bạn. Bạn có thể hỏi về cách tạo playlist, xóa playlist hoặc các tính năng khác.';
+    };
 
     const handleCreatePlaylist = async () => {
         if (!playlistName.trim()) return;
@@ -68,9 +110,41 @@ function Sidebar() {
                 <div className="fixed bottom-44 left-15 z-50 w-80 bg-white text-black rounded-xl shadow-2xl p-4 flex flex-col border border-gray-300 animate-fade-in">
                     <div className="flex justify-between items-center mb-2">
                         <span className="font-bold">Chatbot</span>
-                        <button onClick={() => setShowChat(false)} className="text-gray-500 hover:text-red-500"><i className="fas fa-times"></i></button>
+                        <button onClick={() => setShowChat(false)} className="text-gray-500 hover:text-red-500">
+                            <i className="fas fa-times"></i>
+                        </button>
                     </div>
-                    <div className="flex-1 min-h-[100px]">Chức năng chat ở đây...</div>
+                    <div className="flex-1 min-h-[200px] max-h-[300px] overflow-y-auto mb-4">
+                        {messages.map((msg, index) => (
+                            <div
+                                key={index}
+                                className={`mb-2 p-2 rounded-lg ${
+                                    msg.isBot 
+                                        ? 'bg-gray-100 ml-0' 
+                                        : 'bg-green-500 text-white ml-auto'
+                                } max-w-[80%]`}
+                            >
+                                {msg.text}
+                            </div>
+                        ))}
+                        <div ref={messagesEndRef} />
+                    </div>
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={inputMessage}
+                            onChange={(e) => setInputMessage(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                            placeholder="Nhập tin nhắn..."
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-green-500"
+                        />
+                        <button
+                            onClick={handleSendMessage}
+                            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                        >
+                            <i className="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
                 </div>
             )}
             <div className="p-4">

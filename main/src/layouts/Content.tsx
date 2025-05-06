@@ -1,13 +1,14 @@
-import Footer from './Footer.tsx';
-import Song_item from '../components/song_item.tsx'
-import Artist_item from '../components/artist_item.tsx'
-import Album_item from '../components/album_item.tsx'
-import { useEffect, useState } from 'react';
-import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import {Artist} from '../models/artist.tsx';
-import {Song} from '../models/song.tsx';
-import {Album} from '../models/album.tsx';
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import Album_item from '../components/album_item.tsx';
+import Artist_item from '../components/artist_item.tsx';
+import Song_item from '../components/song_item.tsx';
+import { PlayerContext } from '../controllers/context';
+import { Album } from '../models/album.tsx';
+import { Artist } from '../models/artist.tsx';
+import { Song } from '../models/song.tsx';
+import Footer from './Footer.tsx';
 
 
 const Content = () => {
@@ -15,6 +16,7 @@ const Content = () => {
     const [artists, setArtists] = useState<Artist[]>([]);
     const [songs, setSongs] = useState<Song[]>([]);
     const [albums, setAlbums] = useState<Album[]>([]);
+    const { playWithId } = useContext(PlayerContext);
 
     useEffect(() => {
         axios.get('http://18.142.50.220:8000/api/artists/')
@@ -85,7 +87,7 @@ const Content = () => {
                 <div className="p-6 text-white"> 
                     <div className="flex justify-between mb-3">
                         <h2 className="text-2xl font-bold">Nhạc thịnh hành hiện nay</h2>
-                        <p className="mt-1" onClick={() => navigate("/album")}>Xem tất cả</p>
+                        <p className="mt-1" onClick={() => navigate("/list_song")}>Xem tất cả</p>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
@@ -103,6 +105,7 @@ const Content = () => {
                                     album={song.album} 
                                     participants={song.participants}
                                     interactions={song.interactions}
+                                    onClick={() => playWithId(song.id)}
                                 />
                             );
                         })}

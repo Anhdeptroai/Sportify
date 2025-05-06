@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 // API Configuration
 export const API_BASE_URL = 'http://18.142.50.220:8000';
@@ -34,6 +35,10 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
+    } else if (error.response?.data?.message) {
+      toast.error(error.response.data.message);
+    } else {
+      toast.error('Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại sau.');
     }
     return Promise.reject(error);
   }
@@ -51,11 +56,4 @@ export const API_ENDPOINTS = {
     UPDATE_PROFILE: '/api/user/profile/update/',
   },
   // Add other endpoints as needed
-};
-
-const handlePlaySong = (song: Song) => {
-    setTrack(song);
-    if (audioRef.current) {
-        audioRef.current.play();
-    }
 }; 
