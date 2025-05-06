@@ -1,4 +1,5 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { FaHeart } from 'react-icons/fa'
 import loop_icon from '../assets/image/loop.png'
 import mic_icon from '../assets/image/mic.png'
 import mini_player_icon from '../assets/image/mini-player.png'
@@ -15,8 +16,34 @@ import zoom_icon from '../assets/image/zoom.png'
 import { PlayerContext } from '../controllers/context'
 
 const Player = () => {
-
     const {track, seekBar, seekBg, playStatus, play, pause, time, previous, next, loop, shuffle, seekSong} = useContext(PlayerContext);
+    const [favoriteSongs, setFavoriteSongs] = useState<number[]>([]);
+    const [isFavorite, setIsFavorite] = useState(false);
+
+    useEffect(() => {
+        // Load favorite songs from localStorage
+        const fav = localStorage.getItem('favoriteSongs');
+        if (fav) setFavoriteSongs(JSON.parse(fav));
+    }, []);
+
+    useEffect(() => {
+        if (track) {
+            setIsFavorite(favoriteSongs.includes(track.id));
+        }
+    }, [track, favoriteSongs]);
+
+    const handleToggleFavorite = () => {
+        if (!track) return;
+        let updatedFavorites;
+        if (isFavorite) {
+            updatedFavorites = favoriteSongs.filter(id => id !== track.id);
+        } else {
+            updatedFavorites = [...favoriteSongs, track.id];
+        }
+        setFavoriteSongs(updatedFavorites);
+        localStorage.setItem('favoriteSongs', JSON.stringify(updatedFavorites));
+        setIsFavorite(!isFavorite);
+    };
 
     if (!track) return null;
     const img = `http://18.142.50.220/msa/track_img/${track.image}`;
@@ -28,6 +55,9 @@ const Player = () => {
                 <p>{track.title}</p>
                 <p>{track.participants?.map((p:{ artist_name: string }) => p.artist_name).join(', ')}</p>
             </div>
+            <button onClick={handleToggleFavorite} className="ml-4 focus:outline-none">
+                <FaHeart className={isFavorite ? 'text-red-500 text-2xl' : 'text-white text-2xl'} />
+            </button>
         </div>
 
         <div className='flex flex-col items-center gap-1 m-auto'>
@@ -65,8 +95,6 @@ const Player = () => {
             <img className='w-4' src={mini_player_icon} alt='' />
             <img className='w-4' src={zoom_icon} alt='' />
         </div>
-
-
     </div>
 }
 

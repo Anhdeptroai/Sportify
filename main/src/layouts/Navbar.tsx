@@ -19,39 +19,58 @@ function parseJwt(token: string) {
 const Navbar = () => {
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userName, setUserName] = useState("");
+    const [isLoggedIn, setIsLoggedIn] = useState(() => {
+        const token = localStorage.getItem('token');
+        return !!token;
+    });
+    const [userName, setUserName] = useState(() => localStorage.getItem('userName') || "");
     const [showDropdown, setShowDropdown] = useState(false);
 
     // Lấy thông tin user từ API
     const fetchUserName = async (userId: number, token: string) => {
         try {
             const res = await axios.get(`http://18.142.50.220:8000/api/users/${userId}/`, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
             const { first_name, last_name } = res.data;
-            setUserName(`${first_name} ${last_name}`.trim());
-            localStorage.setItem('userName', `${first_name} ${last_name}`.trim());
+            const fullName = `${first_name} ${last_name}`.trim();
+            setUserName(fullName);
+            localStorage.setItem('userName', fullName);
+            setIsLoggedIn(true);
         } catch (err) {
-            setUserName("");
+            console.error("Lỗi khi lấy thông tin user:", err);
+            handleLogout();
         }
     };
 
     // Kiểm tra đăng nhập và lấy tên user
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        setIsLoggedIn(!!token);
-        if (token) {
-            const payload = parseJwt(token);
-            const userId = payload?.user_id;
-            if (userId) {
-                fetchUserName(userId, token);
-            } else {
-                setUserName("");
+        const checkAuth = () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                handleLogout();
+                return;
             }
-        } else {
-            setUserName("");
-        }
+
+            try {
+                const payload = parseJwt(token);
+                if (!payload || !payload.user_id) {
+                    throw new Error('Invalid token');
+                }
+                fetchUserName(payload.user_id, token);
+            } catch (err) {
+                console.error("Lỗi khi xử lý token:", err);
+                handleLogout();
+            }
+        };
+
+        checkAuth();
+        // Kiểm tra token mỗi 5 phút
+        const interval = setInterval(checkAuth, 5 * 60 * 1000);
+        return () => clearInterval(interval);
     }, []);
 
     const handleLogout = () => {

@@ -51,4 +51,11 @@ export const API_ENDPOINTS = {
     UPDATE_PROFILE: '/api/user/profile/update/',
   },
   // Add other endpoints as needed
+};
+
+const handlePlaySong = (song: Song) => {
+    setTrack(song);
+    if (audioRef.current) {
+        audioRef.current.play();
+    }
 }; 

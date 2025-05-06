@@ -19,6 +19,7 @@ const PlaylistView = () => {
     const [songs, setSongs] = useState<Song[]>([]);
     const [currentPlaylist, setCurrentPlaylist] = useState<Playlist | null>(null);
     const { audioRef } = useContext(PlayerContext);
+    const { setTrack } = useContext(PlayerContext);
     const { 
         playlists,
         getPlaylistSongs,
@@ -82,6 +83,20 @@ const PlaylistView = () => {
         }
     };
 
+    const handlePlaySong = async (song: Song) => {
+        try {
+            setTrack(song);
+            if (audioRef.current) {
+                audioRef.current.src = `http://18.142.50.220/msa/track/${song.audio_file}`;
+                await audioRef.current.load();
+                await audioRef.current.play();
+            }
+        } catch (error) {
+            console.error("Lỗi khi phát nhạc:", error);
+            toast.error("Không thể phát bài hát này");
+        }
+    };
+
     if (!currentPlaylist && id) return <p>Loading playlist...</p>;
     if (!songs) return <p>Loading songs...</p>;
 
@@ -122,17 +137,21 @@ const PlaylistView = () => {
                                     songs.map((song, index) => (
                                         <div 
                                             key={song.id} 
-                                            className="grid grid-cols-3 sm:grid-cols-4 items-center p-4 hover:bg-gray-700 text-white"
+                                            className="grid grid-cols-3 sm:grid-cols-4 items-center p-4 hover:bg-gray-700 text-white cursor-pointer"
+                                            onClick={() => handlePlaySong(song)}
                                         >
                                             <div className="flex items-center">
                                                 <span className="mr-4">{index + 1}</span>
-                                                <span>{song.title}</span>
+                                                <span className="hover:text-green-500 transition-colors">{song.title}</span>
                                             </div>
                                             <p>{song.album}</p>
                                             <p className="hidden sm:block">{new Date().toLocaleDateString()}</p>
                                             <div className="flex justify-center">
                                                 <button 
-                                                    onClick={() => handleRemoveFromPlaylist(song.id)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleRemoveFromPlaylist(song.id);
+                                                    }}
                                                     className="text-white-500 hover:text-white-700"
                                                 >
                                                     Remove
