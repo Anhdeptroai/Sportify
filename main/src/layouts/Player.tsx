@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import { FaHeart } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 import loop_icon from '../assets/image/loop.png'
 import mic_icon from '../assets/image/mic.png'
 import mini_player_icon from '../assets/image/mini-player.png'
@@ -16,7 +17,8 @@ import zoom_icon from '../assets/image/zoom.png'
 import { PlayerContext } from '../controllers/context'
 
 const Player = () => {
-    const {track, audioRef, seekBar, seekBg, playStatus, play, pause, time, previous, next, loop, shuffle, seekSong} = useContext(PlayerContext);
+    const navigate = useNavigate();
+    const { track, audioRef, seekBar, seekBg, playStatus, play, pause, time, previous, next, loop, shuffle, seekSong } = useContext(PlayerContext);
     const [favoriteSongs, setFavoriteSongs] = useState<number[]>([]);
     const [isFavorite, setIsFavorite] = useState(false);
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
@@ -32,6 +34,8 @@ const Player = () => {
     useEffect(() => {
         if (track) {
             setIsFavorite(favoriteSongs.includes(track.id));
+            // Lưu thông tin bài hát hiện tại vào localStorage
+            localStorage.setItem('currentSong', JSON.stringify(track));
         }
     }, [track, favoriteSongs]);
 
@@ -49,7 +53,9 @@ const Player = () => {
     };
 
     const handleShowYoutube = () => {
-        setShowYoutube((prev) => !prev);
+        if (track) {
+            navigate('/video');
+        }
     };
 
     if (!track) return null;
@@ -66,7 +72,7 @@ const Player = () => {
                 <img className="w-12" src={img} alt="" />
                 <div>
                     <p>{track.title}</p>
-                    <p>{track.participants?.map((p:{ artist_name: string }) => p.artist_name).join(', ')}</p>
+                    <p>{track.participants?.map((p: { artist_name: string }) => p.artist_name).join(', ')}</p>
                 </div>
                 <button onClick={handleToggleFavorite} className="ml-4 focus:outline-none">
                     <FaHeart className={isFavorite ? 'text-red-500 text-2xl' : 'text-white text-2xl'} />
@@ -75,16 +81,16 @@ const Player = () => {
 
             <div className='flex flex-col items-center gap-1 m-auto'>
                 <div className='flex gap-4'>
-                    <img onClick={shuffle}className='w-4 cursor-pointer' src={shuffle_icon} alt='' />
+                    <img onClick={shuffle} className='w-4 cursor-pointer' src={shuffle_icon} alt='' />
                     <img onClick={previous} className='w-4 cursor-pointer' src={prev_icon} alt='' />
-                    {playStatus 
-                    ? <img onClick={pause} className='w-4 cursor-pointer' src={pause_icon} alt='' />
-                    : <img onClick={play} className='w-4 cursor-pointer' src={play_icon} alt='' />
+                    {playStatus
+                        ? <img onClick={pause} className='w-4 cursor-pointer' src={pause_icon} alt='' />
+                        : <img onClick={play} className='w-4 cursor-pointer' src={play_icon} alt='' />
                     }
-                    <img onClick={next}  className='w-4 cursor-pointer' src={next_icon} alt='' />
+                    <img onClick={next} className='w-4 cursor-pointer' src={next_icon} alt='' />
                     <img onClick={loop} className='w-4 cursor-pointer' src={loop_icon} alt='' />
                 </div>
-                
+
                 <div className='flex items-center gap-6'>
                     <p>{time.currentTime.minutes}:{time.currentTime.seconds.toString().padStart(2, '0')}</p>
                     <div ref={seekBg} onClick={seekSong} className='w-[60vw] max-w-[500px] bg-gray-300 rounded-full cursor-pointer'>
@@ -100,7 +106,7 @@ const Player = () => {
                 <img className='w-4' src={queue_icon} alt='' />
                 <img className='w-4' src={speaker_icon} alt='' />
                 <img className='w-4' src={volume_icon} alt='' />
-                
+
                 <div className='w-20 bg-slate-50 h-1 rounded'>
                     <div className='bg-green-800 h-1 w-0 rounded'></div>
                 </div>

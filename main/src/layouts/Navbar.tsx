@@ -7,7 +7,7 @@ function parseJwt(token: string) {
     try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
         return JSON.parse(jsonPayload);
@@ -19,7 +19,7 @@ function parseJwt(token: string) {
 const Navbar = () => {
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
-    const [results, setResults] = useState<{artists: any[], songs: any[]}>({artists: [], songs: []});
+    const [results, setResults] = useState<{ artists: any[], songs: any[] }>({ artists: [], songs: [] });
     const [isLoggedIn, setIsLoggedIn] = useState(() => {
         const token = localStorage.getItem('token');
         return !!token;
@@ -32,7 +32,7 @@ const Navbar = () => {
     const fetchUserName = async (userId: number, token: string) => {
         try {
             const res = await axios.get(`http://18.142.50.220:8000/api/users/${userId}/`, {
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
@@ -76,17 +76,30 @@ const Navbar = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userName');
+        // Xóa tất cả dữ liệu trong localStorage
+        localStorage.clear();
+
+        // Reset các state
         setIsLoggedIn(false);
         setUserName("");
         setShowDropdown(false);
+        setSearch("");
+        setResults({ artists: [], songs: [] });
+
+        // Dừng phát nhạc nếu đang phát
+        const audio = document.querySelector('audio');
+        if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
+        }
+
+        // Chuyển hướng về trang login
         navigate('/login');
     };
 
     useEffect(() => {
         if (search.trim() === '') {
-            setResults({artists: [], songs: []});
+            setResults({ artists: [], songs: [] });
             setShowDropdown(false);
             return;
         }
@@ -103,7 +116,7 @@ const Navbar = () => {
                 });
                 setShowDropdown(true);
             } catch (err) {
-                setResults({artists: [], songs: []});
+                setResults({ artists: [], songs: [] });
                 setShowDropdown(false);
             }
         };
@@ -189,13 +202,13 @@ const Navbar = () => {
             <div className="flex items-center">
                 {!isLoggedIn ? (
                     <div className="flex gap-2">
-                        <button 
+                        <button
                             className="h-8 bg-white text-black font-bold rounded-3xl px-4"
                             onClick={() => navigate("/register")}
                         >
                             Đăng Ký
                         </button>
-                        <button 
+                        <button
                             className="h-8 bg-white text-black font-bold rounded-3xl px-4"
                             onClick={() => navigate("/login")}
                         >
@@ -204,17 +217,17 @@ const Navbar = () => {
                     </div>
                 ) : (
                     <div className="relative">
-                        <button 
+                        <button
                             className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-full"
                             onClick={() => setShowDropdown(!showDropdown)}
                         >
                             <FaUser className="text-xl" />
                             <span className="font-medium">{userName}</span>
                         </button>
-                        
+
                         {showDropdown && (
                             <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg py-2 z-50">
-                                <button 
+                                <button
                                     className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-gray-700"
                                     onClick={() => {
                                         navigate("/profile");
@@ -224,7 +237,7 @@ const Navbar = () => {
                                     <FaUserEdit className="text-gray-400" />
                                     <span>Thông tin cá nhân</span>
                                 </button>
-                                <button 
+                                <button
                                     className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-gray-700"
                                     onClick={() => {
                                         navigate("/change-password");
@@ -234,7 +247,7 @@ const Navbar = () => {
                                     <FaKey className="text-gray-400" />
                                     <span>Đổi mật khẩu</span>
                                 </button>
-                                <button 
+                                <button
                                     className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-gray-700"
                                     onClick={handleLogout}
                                 >

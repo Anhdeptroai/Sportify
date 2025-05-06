@@ -9,12 +9,14 @@ import ChangePassword from "../views/ChangePassword.tsx";
 import Detailed_album from "../views/Detailed_album.tsx";
 import Home from '../views/Home.tsx';
 import Individual_artist from '../views/Individual_artist.tsx';
+import List_Song from '../views/List_Song.tsx';
 import Login from '../views/Login.tsx';
 import Playlist from '../views/Playlist.tsx';
 import Profile from "../views/Profile.tsx";
 import Register from '../views/Register.tsx';
 import Song_now from "../views/Song_now.tsx";
-import List_Song from '../views/List_Song.tsx';
+import Video from '../views/Video.tsx';
+
 const AppRoutes = () => {
 
     const displayRef = useRef<HTMLDivElement>(null);
@@ -25,7 +27,7 @@ const AppRoutes = () => {
     const { audioRef, track } = useContext(PlayerContext);
     const song = track ? `http://18.142.50.220/msa/track/${track.audio_file}` : undefined;
 
-    return(
+    return (
         <div ref={displayRef}>
             <ToastContainer
                 position="top-right"
@@ -53,6 +55,7 @@ const AppRoutes = () => {
                 <Route path="/list_song" element={<List_Song />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/change-password" element={<ChangePassword />} />
+                <Route path="/video" element={<Video />} />
                 <Route path="*" element={<h1>404 Not Found</h1>} />
             </Routes>
             <audio ref={audioRef} src={song} preload='auto'></audio>
