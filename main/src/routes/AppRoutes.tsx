@@ -16,6 +16,8 @@ import Profile from "../views/Profile.tsx";
 import Register from '../views/Register.tsx';
 import Song_now from "../views/Song_now.tsx";
 import Video from '../views/Video.tsx';
+import Song from "../views/admin/Song.tsx"
+import Admin from "../views/admin/Admin.tsx";
 
 const AppRoutes = () => {
 
@@ -56,7 +58,10 @@ const AppRoutes = () => {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/change-password" element={<ChangePassword />} />
                 <Route path="/video" element={<Video />} />
+                <Route path="/song/:id" element={<Song />} />
+                <Route path="/admin/Admin" element={<Admin />} />
                 <Route path="*" element={<h1>404 Not Found</h1>} />
+                
             </Routes>
             <audio ref={audioRef} src={song} preload='auto'></audio>
         </div>
