@@ -7,6 +7,7 @@ export type PlayerContextType = {
     seekBar: React.RefObject<HTMLHRElement | null>;
     seekBg: React.RefObject<HTMLDivElement | null>;
     track: any;
+    songs: Song[];
     setTrack: React.Dispatch<React.SetStateAction<any>>;
     playStatus: boolean;
     setPlayStatus: React.Dispatch<React.SetStateAction<boolean>>;
@@ -202,6 +203,7 @@ const PlayerContextProvider: React.FC<React.PropsWithChildren> = ({children}) =>
         seekBar,
         seekBg,
         track,
+        songs,
         setTrack,
         playStatus,
         setPlayStatus,

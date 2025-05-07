@@ -21,15 +21,15 @@ const Detailed_album = () => {
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        axios.get('http://18.142.50.220:8000/api/artists/', { headers: { Authorization: `Bearer ${token}` } })
+        axios.get('http://13.215.205.59:8000/api/artists/', { headers: { Authorization: `Bearer ${token}` } })
             .then(res => setArtists(res.data))
             .catch(err => console.error('Lỗi khi lấy danh sách bài hát:', err));
 
-        axios.get('http://18.142.50.220:8000/api/songs/', { headers: { Authorization: `Bearer ${token}` } })
+        axios.get('http://13.215.205.59:8000/api/songs/', { headers: { Authorization: `Bearer ${token}` } })
             .then(res => setSongs(res.data))
             .catch(err => console.error("Lỗi khi lấy bài hát", err));
 
-        axios.get('http://18.142.50.220:8000/api/albums/', { headers: { Authorization: `Bearer ${token}` } })
+        axios.get('http://13.215.205.59:8000/api/albums/', { headers: { Authorization: `Bearer ${token}` } })
             .then(res => setAlbums(res.data))
             .catch(err => console.error("Lỗi khi lấy bài hát", err));
     }, []);
@@ -50,7 +50,7 @@ const Detailed_album = () => {
     // const artistSongs = getSongsByArtist(Artist_item);
 
 
-    // const pictute = `http://18.142.50.220/msa/artist/${Artist_item.profile_picture}`;
+    // const pictute = `http://13.215.205.59/msa/artist/${Artist_item.profile_picture}`;
 
     return (<>
         <Navbar />
@@ -60,7 +60,7 @@ const Detailed_album = () => {
                 <div className="mt-10 flex gap-8 flex-col md:flex-row md:item-end ml-8 mr-8 text-white">
                     <img
                         className="w-48 rounded"
-                        src={Album_item.songs.length > 0 ? `http://18.142.50.220/msa/track_img/${Album_item.songs[0].image}` : ''}
+                        src={Album_item.songs.length > 0 ? `http://13.215.205.59/msa/track_img/${Album_item.songs[0].image}` : ''}
                         alt={Album_item.title}
                     />
                     <div className="flex flex-col">
@@ -79,7 +79,7 @@ const Detailed_album = () => {
                 <div className="text-white">
                     <div key={Album_item.id} className="mb-6">
                         {Album_item.songs.map((song, index) => {
-                            const picture_song = `http://18.142.50.220/msa/track_img/${song.image}`;
+                            const picture_song = `http://13.215.205.59/msa/track_img/${song.image}`;
                             return (
                                 <div key={index} className="grid grid-cols-3 sm:grid-cols-4 mt-10 mb-4 pl-8 text-[#a7a7a7]"
                                     onClick={() => { navigate(`/song/${song.id}`); playWithId(song.id); }}>

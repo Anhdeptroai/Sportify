@@ -45,7 +45,7 @@ const Profile = () => {
                 const userId = payload.user_id;
 
                 // Gọi API lấy thông tin user
-                const response = await axios.get(`http://18.142.50.220:8000/api/users/${userId}/`, {
+                const response = await axios.get(`http://13.215.205.59:8000/api/users/${userId}/`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -114,7 +114,7 @@ const Profile = () => {
             }
 
             // Gửi dữ liệu cập nhật lên API
-            const response = await axios.put(`http://18.142.50.220:8000/api/users/${userData.id}/`, 
+            const response = await axios.put(`http://13.215.205.59:8000/api/users/${userData.id}/`, 
                 {
                     first_name: userData.first_name,
                     last_name: userData.last_name,
@@ -238,7 +238,7 @@ const Profile = () => {
                                 <div className="md:col-span-2 space-y-2">
                                     <label className="block text-sm font-medium">Ảnh đại diện</label>
                                     <img 
-                                        src={`http://18.142.50.220/msa/profile/${userData.profile_picture}`}
+                                        src={`http://13.215.205.59/msa/profile/${userData.profile_picture}`}
                                         alt="Profile"
                                         className="w-32 h-32 rounded-full object-cover"
                                     />

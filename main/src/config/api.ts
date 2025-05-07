@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
 // API Configuration
-export const API_BASE_URL = 'http://18.142.50.220:8000';
+export const API_BASE_URL = 'http://13.215.205.59:8000';
 
 // Create axios instance with default config
 export const api = axios.create({

@@ -99,7 +99,7 @@ const Register = () => {
 
       // Gọi API đăng ký
       const response = await axios.post(
-        "http://18.142.50.220:8000/api/users/",
+        "http://13.215.205.59:8000/api/users/",
         registerData,
         {
           headers: {

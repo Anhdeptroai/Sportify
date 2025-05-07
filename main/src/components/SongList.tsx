@@ -13,7 +13,7 @@ const SongList = () => {
         <div className="p-4">
             <h2 className="text-2xl font-bold mb-4">Songs</h2>
             <div className="grid gap-4">
-                {songs.map((song) => (
+                {songs.map((song: Song) => (
                     <div
                         key={song.id}
                         className="flex items-center gap-4 p-4 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700"
