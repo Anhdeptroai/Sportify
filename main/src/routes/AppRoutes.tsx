@@ -16,8 +16,8 @@ import Profile from "../views/Profile.tsx";
 import Register from '../views/Register.tsx';
 import Song_now from "../views/Song_now.tsx";
 import Video from '../views/Video.tsx';
-import Song from "../views/admin/Song.tsx"
 import Admin from "../views/admin/Admin.tsx";
+import Song from "../views/admin/Song.tsx";
 
 const AppRoutes = () => {
 
@@ -27,7 +27,7 @@ const AppRoutes = () => {
     const isLogin = location.pathname.includes("login");
     console.log(isLogin);
     const { audioRef, track } = useContext(PlayerContext);
-    const song = track ? `http://18.142.50.220/msa/track/${track.audio_file}` : undefined;
+    const song = track ? `http://13.215.205.59/msa/track/${track.audio_file}` : undefined;
 
     return (
         <div ref={displayRef}>

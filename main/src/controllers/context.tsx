@@ -44,7 +44,7 @@ const PlayerContextProvider: React.FC<React.PropsWithChildren> = ({children}) =>
     useEffect(() => {
         const fetchSongs = async () => {
             try {
-                const res = await axios.get('http://18.142.50.220:8000/api/songs/');
+                const res = await axios.get('http://13.215.205.59:8000/api/songs/');
                 setSongs(res.data);
                 if (res.data.length > 0 && !track) {
                     setTrack(res.data[0]);

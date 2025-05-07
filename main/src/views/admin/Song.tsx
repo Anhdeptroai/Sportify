@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { getAllSong, postSong, putSong } from '../../adminApi/songApi'; // Adjust the import path as necessary
-import type {Song, Participant } from '../../models/song';
 import { getAllAlbum } from '../../adminApi/albumApi'; // Adjust the import path as necessary
+import { getAllSong, postSong, putSong } from '../../adminApi/songApi'; // Adjust the import path as necessary
+import type { Participant } from '../../models/song';
 
 export default function Song() {
     const [songs, setSongs] = useState<any[]>([]);
@@ -307,7 +307,7 @@ export default function Song() {
                 <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
                   {song.image ? (
                     <img
-                      src={`http://18.142.50.220/msa/track_img${song.image}`}
+                      src={`http://13.215.205.59/msa/track_img${song.image}`}
                       alt={song.title}
                       className="w-full h-full object-contain"
                       onError={(e) => {

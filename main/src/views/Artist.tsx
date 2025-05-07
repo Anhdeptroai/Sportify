@@ -26,7 +26,7 @@ function Artists (){
     const [artists, setArtists] = useState<Artist[]>([]);
 
     useEffect(() => {
-        axios.get('http://18.142.50.220:8000/api/artists/')
+        axios.get('http://13.215.205.59:8000/api/artists/')
           .then(res => setArtists(res.data))
           .catch(err => console.error('Lỗi khi lấy danh sách bài hát:', err));
       }, []);
@@ -48,7 +48,7 @@ function Artists (){
                         {artists.map((artist, index) => {
                             let profilePictureUrl = '';
                             if (artist.profile_picture && artist.profile_picture !== "null" && artist.profile_picture !== "") {
-                                profilePictureUrl = `http://18.142.50.220/msa/artist/${artist.profile_picture}`;
+                                profilePictureUrl = `http://13.215.205.59/msa/artist/${artist.profile_picture}`;
                             } else {
                                 profilePictureUrl = defaultImages[index % defaultImages.length];
                             }

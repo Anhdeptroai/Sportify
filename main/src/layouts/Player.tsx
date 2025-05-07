@@ -59,7 +59,7 @@ const Player = () => {
     };
 
     if (!track) return null;
-    const img = `http://18.142.50.220/msa/track_img/${track.image}`;
+    const img = `http://13.215.205.59/msa/track_img/${track.image}`;
 
     return <>
         {showYoutube && (

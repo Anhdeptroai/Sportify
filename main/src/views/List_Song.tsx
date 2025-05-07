@@ -16,7 +16,7 @@ function List_Song (){
     const {playWithId} = useContext(PlayerContext);
 
     useEffect(() => {
-        axios.get('http://18.142.50.220:8000/api/songs/')
+        axios.get('http://13.215.205.59:8000/api/songs/')
             .then(res => setSongs(res.data))
             .catch(err => console.error('Lỗi khi lấy danh sách bài hát:', err));
     }, []);
@@ -35,7 +35,7 @@ function List_Song (){
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                         {songs.map((song) => {
                             const songImg = song.image
-                                ? `http://18.142.50.220/msa/track_img/${song.image}`
+                                ? `http://13.215.205.59/msa/track_img/${song.image}`
                                 : imgDefault;
                             return(
                                 <div key={song.id} className="bg-gray-800 items-center rounded-lg justify-center hover:bg-gray-700 p-4" 

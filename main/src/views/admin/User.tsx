@@ -1,6 +1,6 @@
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { getAllUsers, postUser, putUser } from '../../adminApi/userApi'; // Adjust the import path as necessary
-import axios from 'axios';
 
 export default function User() {
     const [users, setUsers] = useState<any[]>([]);
@@ -231,7 +231,7 @@ export default function User() {
                                     {user.profile_picture ? (
                                         <>
                                             <img
-                                                src={`http://18.142.50.220/msa/user${user.profile_picture}`}
+                                                src={`http://13.215.205.59/msa/user${user.profile_picture}`}
                                                 alt={`${user.first_name} ${user.last_name}`}
                                                 className="w-full h-full object-contain"
                                                 onError={(e) => {

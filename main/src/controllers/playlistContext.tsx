@@ -27,7 +27,7 @@ const PlaylistContextProvider: React.FC<React.PropsWithChildren> = ({ children }
 
     const fetchPlaylists = async () => {
         try {
-            const response = await axios.get('http://18.142.50.220:8000/api/playlists/');
+            const response = await axios.get('http://13.215.205.59:8000/api/playlists/');
             setPlaylists(response.data);
         } catch (error) {
             console.error('Error fetching playlists:', error);
@@ -40,7 +40,7 @@ const PlaylistContextProvider: React.FC<React.PropsWithChildren> = ({ children }
             if (isDuplicate) {
                 throw new Error('Playlist name already exists');
             }
-            const response = await axios.post('http://18.142.50.220:8000/api/playlists/', {
+            const response = await axios.post('http://13.215.205.59:8000/api/playlists/', {
                 title,
                 privacy_setting,
                 creation_date: new Date().toISOString(),
@@ -55,7 +55,7 @@ const PlaylistContextProvider: React.FC<React.PropsWithChildren> = ({ children }
 
     const deletePlaylist = async (id: number) => {
         try {
-            await axios.delete(`http://18.142.50.220:8000/api/playlists/${id}/`);
+            await axios.delete(`http://13.215.205.59:8000/api/playlists/${id}/`);
             setPlaylists(playlists.filter(playlist => playlist.id !== id));
         } catch (error) {
             console.error('Error deleting playlist:', error);
@@ -64,7 +64,7 @@ const PlaylistContextProvider: React.FC<React.PropsWithChildren> = ({ children }
 
     const addSongToPlaylist = async (playlistId: number, songId: number) => {
         try {
-            await axios.post('http://18.142.50.220:8000/api/playlist_songs/', {
+            await axios.post('http://13.215.205.59:8000/api/playlist_songs/', {
                 playlist: playlistId,
                 song: songId
             });
@@ -75,10 +75,10 @@ const PlaylistContextProvider: React.FC<React.PropsWithChildren> = ({ children }
 
     const getPlaylistSongs = async (playlistId: number): Promise<Song[]> => {
         try {
-            const playlistSongsRes = await axios.get('http://18.142.50.220:8000/api/playlist_songs/');
+            const playlistSongsRes = await axios.get('http://13.215.205.59:8000/api/playlist_songs/');
             const playlistSongs: Playlist_songsong[] = playlistSongsRes.data;
             const songIds = playlistSongs.filter(ps => ps.playlist === playlistId).map(ps => ps.song);
-            const songsRes = await axios.get('http://18.142.50.220:8000/api/songs/');
+            const songsRes = await axios.get('http://13.215.205.59:8000/api/songs/');
             const allSongs: Song[] = songsRes.data;
             return allSongs.filter(song => songIds.includes(song.id));
         } catch (error) {
@@ -89,11 +89,11 @@ const PlaylistContextProvider: React.FC<React.PropsWithChildren> = ({ children }
 
     const removeSongFromPlaylist = async (playlistId: number, songId: number) => {
         try {
-            const playlistSongsRes = await axios.get('http://18.142.50.220:8000/api/playlist_songs/');
+            const playlistSongsRes = await axios.get('http://13.215.205.59:8000/api/playlist_songs/');
             const playlistSongs: Playlist_songsong[] = playlistSongsRes.data;
             const toDelete = playlistSongs.find(ps => ps.playlist === playlistId && ps.song === songId);
             if (toDelete) {
-                await axios.delete(`http://18.142.50.220:8000/api/playlist_songs/${toDelete.id}/`);
+                await axios.delete(`http://13.215.205.59:8000/api/playlist_songs/${toDelete.id}/`);
             }
         } catch (error) {
             console.error('Error removing song from playlist:', error);

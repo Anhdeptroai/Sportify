@@ -20,7 +20,7 @@ const SongList = () => {
                         onClick={() => handleSongClick(song)}
                     >
                         <img
-                            src={`http://18.142.50.220/msa/track_img/${song.image}`}
+                            src={`http://13.215.205.59/msa/track_img/${song.image}`}
                             alt={song.title}
                             className="w-12 h-12 rounded"
                         />

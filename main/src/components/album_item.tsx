@@ -11,7 +11,7 @@ const Album_item = ({id, title, songs, description, creation_date, publish_date,
     const {playWithId} = useContext(PlayerContext);
     // Lấy ảnh bài hát đầu tiên nếu có
     const albumImg = songs && songs.length > 0 && songs[0].image
-        ? `http://18.142.50.220/msa/track_img/${songs[0].image}`
+        ? `http://13.215.205.59/msa/track_img/${songs[0].image}`
         : imgDefault;
 
     return (

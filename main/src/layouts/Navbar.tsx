@@ -31,7 +31,7 @@ const Navbar = () => {
     // Lấy thông tin user từ API
     const fetchUserName = async (userId: number, token: string) => {
         try {
-            const res = await axios.get(`http://18.142.50.220:8000/api/users/${userId}/`, {
+            const res = await axios.get(`http://13.215.205.59:8000/api/users/${userId}/`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -107,8 +107,8 @@ const Navbar = () => {
         const fetchResults = async () => {
             try {
                 const [artistRes, songRes] = await Promise.all([
-                    axios.get(`http://18.142.50.220:8000/api/artists/?search=${search}`),
-                    axios.get(`http://18.142.50.220:8000/api/songs/?search=${search}`)
+                    axios.get(`http://13.215.205.59:8000/api/artists/?search=${search}`),
+                    axios.get(`http://13.215.205.59:8000/api/songs/?search=${search}`)
                 ]);
                 setResults({
                     artists: artistRes.data,

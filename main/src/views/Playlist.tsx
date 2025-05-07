@@ -31,7 +31,7 @@ const PlaylistView = () => {
 
     useEffect(() => {
         if (id) {
-            axios.get(`http://18.142.50.220:8000/api/playlists/${id}/`)
+            axios.get(`http://13.215.205.59:8000/api/playlists/${id}/`)
                 .then(res => {
                     setCurrentPlaylist(res.data);
                     return getPlaylistSongs(res.data.id);
@@ -44,7 +44,7 @@ const PlaylistView = () => {
                 });
         } else {
             // Fetch all songs for creating new playlist
-            axios.get('http://18.142.50.220:8000/api/songs/')
+            axios.get('http://13.215.205.59:8000/api/songs/')
                 .then(res => setSongs(res.data))
                 .catch(err => console.error("Error fetching songs:", err));
         }
@@ -103,7 +103,7 @@ const PlaylistView = () => {
             }
 
             // Cập nhật source và load audio
-            audioRef.current.src = `http://18.142.50.220/msa/track/${song.audio_file}`;
+            audioRef.current.src = `http://13.215.205.59/msa/track/${song.audio_file}`;
             await audioRef.current.load();
 
             // Thử phát nhạc
@@ -133,7 +133,7 @@ const PlaylistView = () => {
                             <div className="mt-10 flex gap-8 flex-col md:flex-row md:item-end ml-8 mr-8">
                                 <img 
                                     className="w-48 h-48 object-cover rounded shadow-lg" 
-                                    src={songs[0]?.image ? `http://18.142.50.220/msa/track_img/${songs[0].image}` : imgDefault} 
+                                    src={songs[0]?.image ? `http://13.215.205.59/msa/track_img/${songs[0].image}` : imgDefault} 
                                     alt="Playlist cover" 
                                 />
                                 <div className="flex flex-col">

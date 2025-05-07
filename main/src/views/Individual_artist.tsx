@@ -7,9 +7,9 @@ import Footer from '../layouts/Footer.tsx';
 import Navbar from '../layouts/Navbar.tsx';
 import Player from '../layouts/Player.tsx';
 import Sidebar from '../layouts/Sidebar.tsx';
+import { Album } from '../models/album.tsx';
 import { Artist } from '../models/artist.tsx';
 import { Song } from '../models/song.tsx';
-import {Album} from '../models/album.tsx';
 
 const Individual_artist = () => {
 
@@ -21,15 +21,15 @@ const Individual_artist = () => {
     const {playWithId} = useContext(PlayerContext);
 
     useEffect(() => {
-        axios.get('http://18.142.50.220:8000/api/artists/')
+        axios.get('http://13.215.205.59:8000/api/artists/')
             .then(res => setArtists(res.data))
             .catch(err => console.error('Lỗi khi lấy danh sách bài hát:', err));
 
-        axios.get('http://18.142.50.220:8000/api/songs/')
+        axios.get('http://13.215.205.59:8000/api/songs/')
             .then(res => setSongs(res.data))
             .catch(err => console.error("Lỗi khi lấy bài hát", err));
 
-        axios.get('http://18.142.50.220:8000/api/albums/')
+        axios.get('http://13.215.205.59:8000/api/albums/')
             .then(res => setAlbums(res.data))
             .catch(err => console.error("Lỗi khi lấy bài hát", err));
         }, []);
@@ -59,7 +59,7 @@ const Individual_artist = () => {
     const artistSongs = getSongsByArtist(Artist_item);
     
 
-    const pictute = `http://18.142.50.220/msa/artist/${Artist_item.profile_picture}`;
+    const pictute = `http://13.215.205.59/msa/artist/${Artist_item.profile_picture}`;
 
     return (<>
         <Navbar />
@@ -86,7 +86,7 @@ const Individual_artist = () => {
                     {artistSongs.length > 0 ? (
                         <div className="list-disc">
                         {artistSongs.map((song,index) => {
-                            const picture_song = `http://18.142.50.220/msa/track_img/${song.image}`;
+                            const picture_song = `http://13.215.205.59/msa/track_img/${song.image}`;
                             const songAlbum = getAlbumBySong(song);
                             return(
                                 <div key={index} className="grid grid-cols-3 sm:grid-cols-4 mt-10 mb-4 pl-8 text-[#a7a7a7]"

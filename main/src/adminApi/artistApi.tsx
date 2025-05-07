@@ -1,16 +1,16 @@
 import axios from 'axios';
 
 export const getAllArtists = async () => {
-  const res = await axios.get('http://18.142.50.220:8000/api/artists/'); // sửa URL tùy backend
+  const res = await axios.get('http://13.215.205.59:8000/api/artists/');
   return res.data;
 };
 
 export const postArtist = async (artist: any) => {
-  const response = await axios.post('http://18.142.50.220:8000/api/artists/', artist);
+  const response = await axios.post('http://13.215.205.59:8000/api/artists/', artist);
   return response.data;
 };
 
 export const putArtist = async (id: number | string, artist: any) => {
-  const response = await axios.put(`http://18.142.50.220:8000/api/artists/${id}/`, artist);
+  const response = await axios.put(`http://13.215.205.59:8000/api/artists/${id}/`, artist);
   return response.data;
 };

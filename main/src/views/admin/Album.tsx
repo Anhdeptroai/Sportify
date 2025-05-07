@@ -1,4 +1,6 @@
+import React, { useEffect, useState } from 'react';
 import { getAllAlbum, postAlbum, putAlbum } from '../../adminApi/albumApi';
+import { getAllArtists } from '../../adminApi/artistApi';
 
 export default function Album() {
     const [albums, setAlbums] = useState<any[]>([]);
@@ -23,7 +25,7 @@ export default function Album() {
     }, []);
 
     useEffect(() => {
-        getAllArtist().then(setArtists);
+        getAllArtists().then(setArtists);
     }, []);
 
     // Filter albums by search term
@@ -267,7 +269,7 @@ export default function Album() {
                                 <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
                                     {album.image ? (
                                         <img
-                                            src={`http://18.142.50.220/msa/track_img${album.image}`}
+                                            src={`http://13.215.205.59/msa/track_img${album.image}`}
                                             alt={album.title}
                                             className="w-full h-full object-contain"
                                             onError={(e) => {

@@ -26,7 +26,7 @@ const Song_now = () => {
     const [isFavorite, setIsFavorite] = useState(false);
 
     useEffect(() => {
-        axios.get('http://18.142.50.220:8000/api/songs/')
+        axios.get('http://13.215.205.59:8000/api/songs/')
             .then(res => setSongs(res.data))
             .catch(err => console.error("Lỗi khi lấy bài hát", err));
     }, []);
@@ -47,8 +47,8 @@ const Song_now = () => {
         }
     }, [Song_item, favoriteSongs]);
 
-    // const track = `http://18.142.50.220/msa/track/${Song_item.audio_file}`;
-    const image = `http://18.142.50.220/msa/track_img/${Song_item?.image}`;
+    // const track = `http://13.215.205.59/msa/track/${Song_item.audio_file}`;
+    const image = `http://13.215.205.59/msa/track_img/${Song_item?.image}`;
 
     const handleAddToPlaylist = async () => {
         if (!selectedPlaylist || !Song_item) {

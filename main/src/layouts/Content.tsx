@@ -19,15 +19,15 @@ const Content = () => {
     const { playWithId } = useContext(PlayerContext);
 
     useEffect(() => {
-        axios.get('http://18.142.50.220:8000/api/artists/')
+        axios.get('http://13.215.205.59:8000/api/artists/')
             .then(res => setArtists(res.data))
             .catch(err => console.error('Lỗi khi lấy danh sách nghệ sĩ:', err));
 
-        axios.get('http://18.142.50.220:8000/api/songs/')
+        axios.get('http://13.215.205.59:8000/api/songs/')
             .then(res => setSongs(res.data))
             .catch(err => console.error("Lỗi khi lấy bài hát", err));
 
-        axios.get('http://18.142.50.220:8000/api/albums/')
+        axios.get('http://13.215.205.59:8000/api/albums/')
             .then(res => setAlbums(res.data))
             .catch(err => console.error("Lỗi khi lấy album", err));
     }, []);
@@ -45,7 +45,7 @@ const Content = () => {
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                         {artists.slice(0, 5).map((artist, index) => {
-                            const profilePictureUrl = `http://18.142.50.220/msa/artist/${artist.profile_picture}`;
+                            const profilePictureUrl = `http://13.215.205.59/msa/artist/${artist.profile_picture}`;
                             return (
                                 <Artist_item 
                                     key={index} 
@@ -92,7 +92,7 @@ const Content = () => {
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                         {songs.slice(0, 5).map((song, index) => {
-                            const PictureSongUrl = `http://18.142.50.220/msa/track_img/${song.image}`;
+                            const PictureSongUrl = `http://13.215.205.59/msa/track_img/${song.image}`;
                             return (
                                 <Song_item 
                                     key={index} 

@@ -1,6 +1,6 @@
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { getAllArtists, postArtist, putArtist } from '../../adminApi/artistApi'; // Adjust the import path as necessary
-import axios from 'axios';
 
 export default function Artist() {
   const [artists, setArtists] = useState<any[]>([]);
@@ -77,7 +77,7 @@ export default function Artist() {
   const handleDelete = async (id: number) => {
     if (window.confirm("Bạn chắc chắn muốn xóa?")) {
       try {
-        await axios.delete(`http://18.142.50.220:8000/api/artists/${id}/`);
+        await axios.delete(`http://13.215.205.59:8000/api/artists/${id}/`);
         // Cập nhật state sau khi xóa thành công
         setArtists(prev => prev.filter(artist => artist.id !== id));
         alert("Xóa thành công!");
@@ -248,7 +248,7 @@ export default function Artist() {
                   {artist.profile_picture ? (
                     <>
                       <img 
-                        src={`http://18.142.50.220/msa/artist${artist.profile_picture}`} 
+                        src={`http://13.215.205.59/msa/artist${artist.profile_picture}`} 
                         alt={artist.name} 
                         className="w-full h-full"
                         style={{ objectFit: 'contain' }}

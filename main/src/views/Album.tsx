@@ -16,10 +16,10 @@ function Album (){
     const [songs, setSongs] = useState<Song[]>([]);
 
     useEffect(() => {
-        axios.get('http://18.142.50.220:8000/api/albums/')
+        axios.get('http://13.215.205.59:8000/api/albums/')
             .then(res => setAlbums(res.data))
             .catch(err => console.error('Lỗi khi lấy danh sách album:', err));
-        axios.get('http://18.142.50.220:8000/api/songs/')
+        axios.get('http://13.215.205.59:8000/api/songs/')
             .then(res => setSongs(res.data))
             .catch(err => console.error('Lỗi khi lấy danh sách bài hát:', err));
     }, []);
@@ -41,7 +41,7 @@ function Album (){
                             // Tìm bài hát đầu tiên thuộc album này
                             const firstSong = songs.find(song => song.album === album.id);
                             const albumImg = firstSong && firstSong.image
-                                ? `http://18.142.50.220/msa/track_img/${firstSong.image}`
+                                ? `http://13.215.205.59/msa/track_img/${firstSong.image}`
                                 : imgDefault;
                             return(
                                 <div key={album.id} className="bg-gray-800 items-center rounded-lg justify-center hover:bg-gray-700 p-4" 
