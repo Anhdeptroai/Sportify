@@ -1,6 +1,6 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { getAllUsers, postUser, putUser } from '../../adminApi/userApi'; // Adjust the import path as necessary
+import { getAllUsers, postUser, deleteUser } from '../../adminApi/userApi'; // Adjust the import path as necessary
+import { toast } from 'react-toastify';
 
 export default function User() {
     const [users, setUsers] = useState<any[]>([]);
@@ -15,14 +15,22 @@ export default function User() {
         followees_count: 0,
         subscription_type: ''
     });
-    const [editUser, setEditUser] = useState<any>(null);
-    const [showEditForm, setShowEditForm] = useState(false);
+    const [errors, setErrors] = useState({
+        email: '',
+        password: '',
+        first_name: '',
+        last_name: '',
+        profile_picture: '',
+        followees_count: '',
+        subscription_type: ''
+    });
+
+    const fetchData = async () => {
+        const user = await getAllUsers();
+        setUsers(user);
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            const user = await getAllUsers(); // Assuming this function fetches user data
-            setUsers(user);
-        };
         fetchData();
     }, []);
 
@@ -30,6 +38,58 @@ export default function User() {
     const filteredUsers = users.filter(user =>
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const validateForm = () => {
+        let newErrors = {
+            email: '',
+            password: '',
+            first_name: '',
+            last_name: '',
+            profile_picture: '',
+            followees_count: '',
+            subscription_type: ''
+        };
+        let isValid = true;
+
+        // Validate email
+        if (!newUser.email.trim()) {
+            newErrors.email = "Vui lòng nhập email";
+            isValid = false;
+        } else if (!/\S+@\S+\.\S+/.test(newUser.email)) {
+            newErrors.email = "Email không hợp lệ";
+            isValid = false;
+        }
+
+        // Validate password
+        if (!newUser.password) {
+            newErrors.password = "Vui lòng nhập mật khẩu";
+            isValid = false;
+        } else if (newUser.password.length < 6) {
+            newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+            isValid = false;
+        }
+
+        // Validate first name
+        if (!newUser.first_name.trim()) {
+            newErrors.first_name = "Vui lòng nhập tên";
+            isValid = false;
+        }
+
+        // Validate last name
+        if (!newUser.last_name.trim()) {
+            newErrors.last_name = "Vui lòng nhập họ";
+            isValid = false;
+        }
+
+        // Validate followees count
+        if (newUser.followees_count < 0) {
+            newErrors.followees_count = "Số lượng người theo dõi không thể âm";
+            isValid = false;
+        }
+
+        setErrors(newErrors);
+        return isValid;
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -52,61 +112,31 @@ export default function User() {
     };
 
     const handleSubmit = async () => {
+        if (!validateForm()) {
+            return; // Nếu không hợp lệ, không gửi dữ liệu
+        }
+
         try {
             const created = await postUser(newUser);
             setUsers(prev => [...prev, created]);
-            alert('Thêm user thành công!');
+            toast.success('Thêm user thành công!');
             handleCancel();
+            fetchData();
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error('Error adding user:', error.response?.data);
-            } else {
-                console.error('Error adding user:', error);
+            toast.error('user đã tồn tại!');
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if(window.confirm("Bạn có muốn xóa user này không?")) {
+            try{
+                await deleteUser(id);
+                setUsers(prev => prev.filter(user => user.id !== id));
+                toast.success('Xóa user thành công!');
+            }catch{
+                toast.error('Có lỗi khi xóa user!');
             }
         }
-    };
-
-    const handleEditClick = (user: any) => {
-        setEditUser({
-            ...user,
-            first_name: user.first_name ?? '',
-            last_name: user.last_name ?? '',
-            subscription_type: user.subscription_type ?? '',
-            profile_picture: user.profile_picture ?? '',
-            followees_count: user.followees_count ?? 0
-        });
-        setShowEditForm(true);
-    };
-
-    const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setEditUser((prev: any) => ({ ...prev, [name]: value }));
-    };
-
-    const handleEditSubmit = async () => {
-        try {
-            const updateData = {
-                email: editUser.email ?? '',
-                first_name: editUser.first_name ?? '',
-                last_name: editUser.last_name ?? '',
-                profile_picture: editUser.profile_picture ?? '',
-                followees_count: Number(editUser.followees_count) || 0,
-                subscription_type: editUser.subscription_type ?? ''
-            };
-            await putUser(editUser.id, updateData);
-            alert('Lưu user thành công!');
-            setShowEditForm(false);
-            setEditUser(null);
-            const userList = await getAllUsers();
-            setUsers(userList);
-        } catch (error) {
-            alert('Có lỗi khi cập nhật user!');
-        }
-    };
-
-    const handleEditCancel = () => {
-        setShowEditForm(false);
-        setEditUser(null);
     };
 
     return (
@@ -161,47 +191,54 @@ export default function User() {
 
             {showForm && (
                 <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-4">
-                    <h3 className="text-lg mb-4">Add New User</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 className="text-lg mb-4 text-white font-bold">Add New User</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <input
                             type="text" name="email" placeholder="Email" value={newUser.email}
                             onChange={handleInputChange}
-                            className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="bg-gray-700 text-white p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
                         />
+                        {errors.email && <span className="text-red-500">{errors.email}</span>}
                         <input
                             type="password" name="password" placeholder="Password" value={newUser.password}
                             onChange={handleInputChange}
-                            className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="bg-gray-700 text-white p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
                         />
+                        {errors.password && <span className="text-red-500">{errors.password}</span>}
                         <input
                             type="text" name="first_name" placeholder="First Name" value={newUser.first_name}
                             onChange={handleInputChange}
-                            className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="bg-gray-700 text-white p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
                         />
+                        {errors.first_name && <span className="text-red-500">{errors.first_name}</span>}
                         <input
                             type="text" name="last_name" placeholder="Last Name" value={newUser.last_name}
                             onChange={handleInputChange}
-                            className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="bg-gray-700 text-white p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
                         />
+                        {errors.last_name && <span className="text-red-500">{errors.last_name}</span>}
                         <input
                             type="text" name="profile_picture" placeholder="Profile Picture Path" value={newUser.profile_picture}
                             onChange={handleInputChange}
-                            className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="bg-gray-700 text-white p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
                         />
+                        {errors.profile_picture && <span className="text-red-500">{errors.profile_picture}</span>}
                         <input
                             type="number" name="followees_count" placeholder="Followees Count" value={newUser.followees_count}
                             onChange={handleInputChange}
-                            className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="bg-gray-700 text-white p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
                         />
+                        {errors.followees_count && <span className="text-red-500">{errors.followees_count}</span>}
                         <input
                             type="text" name="subscription_type" placeholder="Subscription Type" value={newUser.subscription_type}
                             onChange={handleInputChange}
-                            className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="bg-gray-700 text-white p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
                         />
+                        {errors.subscription_type && <span className="text-red-500">{errors.subscription_type}</span>}
                     </div>
-                    <div className="mt-4 flex justify-end gap-2">
-                        <button onClick={handleCancel} className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded">Cancel</button>
-                        <button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded">Save</button>
+                    <div className="mt-4 flex justify-end gap-4">
+                        <button onClick={handleCancel} className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded transition duration-200 cursor-pointer">Cancel</button>
+                        <button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-6 rounded transition duration-200 cursor-pointer">Save</button>
                     </div>
                 </div>
             )}
@@ -257,13 +294,11 @@ export default function User() {
                             <td className="p-2 border">{user.subscription_type || '—'}</td>
                             <td className="p-2 border">
                                 <div className="flex gap-2 justify-center">
-                                    <button
-                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
-                                        onClick={() => handleEditClick(user)}
+                           
+                                    <button 
+                                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded cursor-pointer"
+                                        onClick={() => handleDelete(user.id)}
                                     >
-                                        Edit
-                                    </button>
-                                    <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
                                         Delete
                                     </button>
                                 </div>
@@ -273,77 +308,7 @@ export default function User() {
                 </tbody>
             </table>
 
-            {showEditForm && editUser && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                    <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg">
-                        <h3 className="text-lg mb-4 text-white">Edit User</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input
-                                type="text"
-                                name="email"
-                                placeholder="Email"
-                                value={editUser.email}
-                                onChange={handleEditInputChange}
-                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <input
-                                type="text"
-                                name="first_name"
-                                placeholder="First Name"
-                                value={editUser.first_name ?? ''}
-                                onChange={handleEditInputChange}
-                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <input
-                                type="text"
-                                name="last_name"
-                                placeholder="Last Name"
-                                value={editUser.last_name ?? ''}
-                                onChange={handleEditInputChange}
-                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <input
-                                type="text"
-                                name="profile_picture"
-                                placeholder="Profile Picture Path"
-                                value={editUser.profile_picture ?? ''}
-                                onChange={handleEditInputChange}
-                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <input
-                                type="number"
-                                name="followees_count"
-                                placeholder="Followees Count"
-                                value={editUser.followees_count ?? 0}
-                                onChange={handleEditInputChange}
-                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <input
-                                type="text"
-                                name="subscription_type"
-                                placeholder="Subscription Type"
-                                value={editUser.subscription_type ?? ''}
-                                onChange={handleEditInputChange}
-                                className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-                        <div className="mt-4 flex justify-end gap-2">
-                            <button
-                                onClick={handleEditCancel}
-                                className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleEditSubmit}
-                                className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded"
-                            >
-                                Save
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+           
         </div>
     );
 }

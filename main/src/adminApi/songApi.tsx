@@ -12,3 +12,6 @@ export const putSong = async (id: number | string, song: any) => {
   const response = await axios.put(`http://13.215.205.59:8000/api/songs/${id}/`, song);
   return response.data;
 };
+export const deleteSong = async (id: number | string) => {
+  return  await axios.delete(`http://13.215.205.59:8000/api/songs/${id}/`);
+};

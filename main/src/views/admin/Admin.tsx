@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import  { useState } from 'react'
 import {Admin_header} from '../../components/Admin/AdminHeader';
 import {Admin_navbar} from '../../components/Admin/AdminNavbar';  
 import Artist from './Artist';
@@ -10,7 +10,7 @@ import User from './User';
 
 export default function Admin() {
   
-    const [selectedTab, setSelectedTab] = useState('Artist');
+    const [selectedTab, setSelectedTab] = useState('Song');
     const navigate = useNavigate();
 
    // ✅ Hàm xử lý logout
@@ -23,9 +23,7 @@ export default function Admin() {
     };
  
     
-  const handleSelectTab = (tab: string) => {
-    setSelectedTab(tab);
-  };
+ 
  
 
    

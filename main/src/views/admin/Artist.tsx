@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { getAllArtists, postArtist, putArtist } from '../../adminApi/artistApi'; // Adjust the import path as necessary
+import { getAllArtists, postArtist, putArtist, deleteArtist } from '../../adminApi/artistApi'; // Adjust the import path as necessary
+import { toast } from 'react-toastify';
 
 export default function Artist() {
   const [artists, setArtists] = useState<any[]>([]);
@@ -10,13 +11,15 @@ export default function Artist() {
   const [showEdit, setShowEdit] = useState<boolean>(false);
   const [editArtist, setEditArtist] = useState<any>(null);
 
+
+  const fetchData = async ()=> {
+    const res = await getAllArtists();
+    setArtists(res);
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      const res = await getAllArtists();
-      setArtists(res);
-    };
     fetchData();
   }, []);
+
 
   // Filter artists by name
   const filteredArtists = artists.filter(artist =>
@@ -40,7 +43,9 @@ export default function Artist() {
       const created = await postArtist(newArtist);
       setArtists(prev => [...prev, created]);
       handleCancel();
-    } catch (error) {
+      fetchData();
+      toast.success('Artist added successfully');
+   } catch (error) {
       console.error('Error adding artist:', error);
     }
   };
@@ -61,11 +66,13 @@ export default function Artist() {
     try {
       const updated = await putArtist(editArtist.id, editArtist);
       setArtists(prev => prev.map(a => a.id === updated.id ? updated : a));
+      await fetchData();
       setShowEdit(false);
       setEditArtist(null);
-      alert('Cập nhật nghệ sĩ thành công!');
+      toast.success('Cập nhật nghệ sĩ thành công!');
+      await fetchData();
     } catch (err) {
-      alert('Có lỗi khi cập nhật nghệ sĩ!');
+      toast.success('Có lỗi khi cập nhật nghệ sĩ!');
     }
   };
 
@@ -76,16 +83,17 @@ export default function Artist() {
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Bạn chắc chắn muốn xóa?")) {
-      try {
-        await axios.delete(`http://13.215.205.59:8000/api/artists/${id}/`);
-        // Cập nhật state sau khi xóa thành công
-        setArtists(prev => prev.filter(artist => artist.id !== id));
-        alert("Xóa thành công!");
-      } catch (error) {
-        console.error("Lỗi khi xóa artist:", error);
-      }
+        try {
+            await deleteArtist(id); // Sử dụng hàm deleteArtist
+            // Cập nhật state sau khi xóa thành công
+            setArtists(prev => prev.filter(artist => artist.id !== id));
+            toast.success("Xóa thành công!");
+            fetchData();
+        } catch (error) {
+            toast.error("Lỗi khi xóa artist:"); // Sửa thành toast.error để hiển thị thông báo lỗi
+        }
     }
-  };
+};
 
   return (
     <div>
@@ -118,7 +126,7 @@ export default function Artist() {
             </div>
           </div>
         </div>
-        <button onClick={handleAddClick} className="flex items-center bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
+        <button onClick={handleAddClick} className="flex items-center bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg cursor-pointer">
           {/* SVG Icon cho nút thêm */}
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
@@ -163,8 +171,8 @@ export default function Artist() {
             />
           </div>
           <div className="mt-4 flex justify-end gap-2">
-            <button onClick={handleCancel} className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded">Cancel</button>
-            <button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded">Save</button>
+            <button onClick={handleCancel} className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded cursor-pointer">Cancel</button>
+            <button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded cursor-pointer">Save</button>
           </div>
         </div>
       )}
@@ -206,19 +214,19 @@ export default function Artist() {
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={handleEditCancel}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleEditSave}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold"
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold cursor-pointer"
               >
                 Lưu
               </button>
             </div>
             <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl"
+              className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl cursor-pointer"
               onClick={handleEditCancel}
             >
               ×
@@ -277,13 +285,13 @@ export default function Artist() {
               <td className="p-4 border">
                 <div className="flex gap-2 justify-center">
                   <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded cursor-pointer"
                     onClick={() => handleEditClick(artist)}
                   >
                     Edit
                   </button>
                   <button 
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded cursor-pointer"
                     onClick={() => handleDelete(artist.id)}
                   >
                     Delete
