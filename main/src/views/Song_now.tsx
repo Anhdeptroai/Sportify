@@ -24,6 +24,8 @@ const Song_now = () => {
     const [adding, setAdding] = useState(false);
     const [favoriteSongs, setFavoriteSongs] = useState<number[]>([]);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [favoriteInteractionId, setFavoriteInteractionId] = useState<number|null>(null);
+    const [loadingFavorite, setLoadingFavorite] = useState(true);
 
     useEffect(() => {
         axios.get('http://13.215.205.59:8000/api/songs/')
@@ -42,10 +44,35 @@ const Song_now = () => {
     console.log(Song_item);
 
     useEffect(() => {
-        if (Song_item) {
-            setIsFavorite(favoriteSongs.includes(Song_item.id));
-        }
-    }, [Song_item, favoriteSongs]);
+        const fetchFavorite = async () => {
+            if (!Song_item) return;
+            setLoadingFavorite(true);
+            const userIdStr = localStorage.getItem('user_id');
+            const userId = userIdStr ? Number(userIdStr) : null;
+            if (!userId) {
+                setIsFavorite(false);
+                setFavoriteInteractionId(null);
+                setLoadingFavorite(false);
+                return;
+            }
+            try {
+                const res = await axios.get('http://13.215.205.59:8000/api/interactions/');
+                const found = res.data.find((interaction: any) =>
+                    interaction.user === userId &&
+                    interaction.song === Song_item.id &&
+                    interaction.interaction_type === 'favor'
+                );
+                setIsFavorite(!!found);
+                setFavoriteInteractionId(found ? found.id : null);
+            } catch (e) {
+                setIsFavorite(false);
+                setFavoriteInteractionId(null);
+            } finally {
+                setLoadingFavorite(false);
+            }
+        };
+        fetchFavorite();
+    }, [Song_item]);
 
     // const track = `http://13.215.205.59/msa/track/${Song_item.audio_file}`;
     const image = `http://13.215.205.59/msa/track_img/${Song_item?.image}`;
@@ -67,17 +94,37 @@ const Song_now = () => {
         }
     };
 
-    const handleToggleFavorite = () => {
+    const handleToggleFavorite = async () => {
         if (!Song_item) return;
-        let updatedFavorites;
-        if (isFavorite) {
-            updatedFavorites = favoriteSongs.filter(id => id !== Song_item.id);
-        } else {
-            updatedFavorites = [...favoriteSongs, Song_item.id];
+        const userIdStr = localStorage.getItem('user_id');
+        const userId = userIdStr ? Number(userIdStr) : null;
+        if (!userId) {
+            toast.error('Vui lòng đăng nhập để thêm bài hát vào yêu thích!');
+            return;
         }
-        setFavoriteSongs(updatedFavorites);
-        localStorage.setItem('favoriteSongs', JSON.stringify(updatedFavorites));
-        setIsFavorite(!isFavorite);
+        setLoadingFavorite(true);
+        try {
+            if (isFavorite && favoriteInteractionId) {
+                await axios.delete(`http://13.215.205.59:8000/api/interactions/${favoriteInteractionId}/`);
+                setIsFavorite(false);
+                setFavoriteInteractionId(null);
+                toast.success('Đã xóa khỏi yêu thích!');
+            } else if (!isFavorite) {
+                const res = await axios.post('http://13.215.205.59:8000/api/interactions/', {
+                    user: userId,
+                    song: Song_item.id,
+                    interaction_type: "favor",
+                    timestamp: new Date().toISOString()
+                });
+                setIsFavorite(true);
+                setFavoriteInteractionId(res.data.id);
+                toast.success('Đã thêm vào yêu thích!');
+            }
+        } catch (error) {
+            toast.error('Có lỗi xảy ra khi cập nhật yêu thích!');
+        } finally {
+            setLoadingFavorite(false);
+        }
     };
 
     const handleDownload = () => {
@@ -126,7 +173,7 @@ const Song_now = () => {
                             <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 mt-2" onClick={() => setShowAdd(v => !v)}>
                                 Thêm vào Playlist
                             </button>
-                            <button onClick={handleToggleFavorite} className="focus:outline-none">
+                            <button onClick={handleToggleFavorite} className="focus:outline-none" disabled={loadingFavorite}>
                                 <FaHeart className={isFavorite ? 'text-red-500 text-2xl' : 'text-white text-2xl'} />
                             </button>
                             <button onClick={handleDownload} className="focus:outline-none">

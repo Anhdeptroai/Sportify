@@ -113,6 +113,10 @@ function Sidebar() {
         }
     };
 
+    const handleFavouriteClick = () => {
+        navigate(`/favourite`);
+    };
+
     return (
         <div className="bg-gray-800 h-[calc(100vh-23vh)] w-150 m-2 rounded-2xl text-white relative">
             {/* Chat button */}
@@ -168,6 +172,19 @@ function Sidebar() {
             )}
             <div className="p-4">
                 <div className="flex relative">
+                    <h2 className="text-xl font-bold mb-5">Danh sách yêu thích</h2>
+                    
+                </div>
+                <div 
+                    onClick={() => handleFavouriteClick()}
+                    className="bg-gray-900 p-4 rounded-lg mb-4 flex items-center justify-between cursor-pointer hover:bg-gray-700 transition-colors"
+                >
+                    <div className="flex-1">
+                        <h3 className="font-bold">Yêu thích</h3>
+                    </div>                        
+                </div>
+
+                <div className="flex relative">
                     <h2 className="text-xl font-bold mb-5">Danh sách phát</h2>
                     {/* Nút tạo playlist */}
                     <button
@@ -176,7 +193,7 @@ function Sidebar() {
                         title="Tạo playlist mới"
                     ></button>
                 </div>
-                <div className="h-[calc(100vh-40vh)] overflow-y-auto">
+                <div className="h-[calc(100vh-75vh)] overflow-y-auto">
                     {loading ? (
                         <div className="bg-gray-900 p-4 rounded-lg mb-4 text-center">
                             <h3 className="font-bold">Đang tải...</h3>

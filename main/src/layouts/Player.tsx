@@ -1,6 +1,8 @@
+import axios from 'axios'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { FaHeart } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import loop_icon from '../assets/image/loop.png'
 import mic_icon from '../assets/image/mic.png'
 import mini_player_icon from '../assets/image/mini-player.png'
@@ -21,9 +23,11 @@ const Player = () => {
     const { track, audioRef, seekBar, seekBg, playStatus, play, pause, time, previous, next, loop, shuffle, seekSong } = useContext(PlayerContext);
     const [favoriteSongs, setFavoriteSongs] = useState<number[]>([]);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [loadingFavorite, setLoadingFavorite] = useState(true);
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
     const [showYoutube, setShowYoutube] = useState(false);
     const volumeSliderRef = useRef<HTMLDivElement>(null);
+    const [favoriteInteractionId, setFavoriteInteractionId] = useState<number|null>(null);
 
     useEffect(() => {
         // Load favorite songs from localStorage
@@ -32,24 +36,69 @@ const Player = () => {
     }, []);
 
     useEffect(() => {
-        if (track) {
-            setIsFavorite(favoriteSongs.includes(track.id));
-            // Lưu thông tin bài hát hiện tại vào localStorage
-            localStorage.setItem('currentSong', JSON.stringify(track));
-        }
-    }, [track, favoriteSongs]);
+        const fetchFavorite = async () => {
+            if (!track) return;
+            setLoadingFavorite(true);
+            const userIdStr = localStorage.getItem('user_id');
+            const userId = userIdStr ? Number(userIdStr) : null;
+            if (!userId) {
+                setIsFavorite(false);
+                setFavoriteInteractionId(null);
+                setLoadingFavorite(false);
+                return;
+            }
+            try {
+                const res = await axios.get('http://13.215.205.59:8000/api/interactions/');
+                const found = res.data.find((interaction: any) =>
+                    interaction.user === userId &&
+                    interaction.song === track.id &&
+                    interaction.interaction_type === 'favor'
+                );
+                setIsFavorite(!!found);
+                setFavoriteInteractionId(found ? found.id : null);
+            } catch (e) {
+                setIsFavorite(false);
+                setFavoriteInteractionId(null);
+            } finally {
+                setLoadingFavorite(false);
+            }
+        };
+        fetchFavorite();
+    }, [track]);
 
-    const handleToggleFavorite = () => {
+    const handleToggleFavorite = async () => {
         if (!track) return;
-        let updatedFavorites;
-        if (isFavorite) {
-            updatedFavorites = favoriteSongs.filter(id => id !== track.id);
-        } else {
-            updatedFavorites = [...favoriteSongs, track.id];
+        const userIdStr = localStorage.getItem('user_id');
+        const userId = userIdStr ? Number(userIdStr) : null;
+        if (!userId) {
+            toast.error('Vui lòng đăng nhập để thêm bài hát vào yêu thích!');
+            return;
         }
-        setFavoriteSongs(updatedFavorites);
-        localStorage.setItem('favoriteSongs', JSON.stringify(updatedFavorites));
-        setIsFavorite(!isFavorite);
+        setLoadingFavorite(true);
+        try {
+            if (isFavorite && favoriteInteractionId) {
+                // Xóa khỏi server
+                await axios.delete(`http://13.215.205.59:8000/api/interactions/${favoriteInteractionId}/`);
+                setIsFavorite(false);
+                setFavoriteInteractionId(null);
+                toast.success('Đã xóa khỏi danh sách yêu thích!');
+            } else if (!isFavorite) {
+                // Thêm lên server
+                const res = await axios.post('http://13.215.205.59:8000/api/interactions/', {
+                    user: userId,
+                    song: track.id,
+                    interaction_type: "favor",
+                    timestamp: new Date().toISOString()
+                });
+                setIsFavorite(true);
+                setFavoriteInteractionId(res.data.id);
+                toast.success('Đã thêm vào danh sách yêu thích!');
+            }
+        } catch (error) {
+            toast.error('Có lỗi xảy ra khi cập nhật yêu thích!');
+        } finally {
+            setLoadingFavorite(false);
+        }
     };
 
     const handleShowYoutube = () => {
@@ -74,7 +123,7 @@ const Player = () => {
                     <p>{track.title}</p>
                     <p>{track.participants?.map((p: { artist_name: string }) => p.artist_name).join(', ')}</p>
                 </div>
-                <button onClick={handleToggleFavorite} className="ml-4 focus:outline-none">
+                <button onClick={handleToggleFavorite} className="ml-4 focus:outline-none" disabled={loadingFavorite}>
                     <FaHeart className={isFavorite ? 'text-red-500 text-2xl' : 'text-white text-2xl'} />
                 </button>
             </div>

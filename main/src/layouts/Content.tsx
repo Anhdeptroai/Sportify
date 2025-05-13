@@ -101,6 +101,7 @@ const Content = () => {
                                     duration={song.duration}
                                     genre={song.genre}
                                     audio_file={song.audio_file}
+                                    video_file={song.video_file}
                                     image={PictureSongUrl} 
                                     album={song.album} 
                                     participants={song.participants}

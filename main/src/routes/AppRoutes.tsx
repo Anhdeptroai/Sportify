@@ -18,6 +18,7 @@ import Song_now from "../views/Song_now.tsx";
 import Video from '../components/Video.tsx';
 import Admin from "../views/admin/Admin.tsx";
 import Song from "../views/admin/Song.tsx";
+import Favourite from '../views/Favourite.tsx';
 
 const AppRoutes = () => {
 
@@ -53,6 +54,7 @@ const AppRoutes = () => {
                 <Route path="/album" element={<Album />} />
                 <Route path="/album/:id" element={<Detailed_album />} />
                 <Route path="/playlist/:id" element={<Playlist />} />
+                <Route path="/favourite" element={<Favourite />} />
                 <Route path="/list_song" element={<List_Song />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/change-password" element={<ChangePassword />} />
