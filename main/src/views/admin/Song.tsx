@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getAllAlbum } from '../../adminApi/albumApi'; // Adjust the import path as necessary
-import { getAllSong, postSong, putSong, deleteSong } from '../../adminApi/songApi'; // Adjust the import path as necessary
+import { getAllAlbum } from '../../adminApi/albumApi'; 
+import { getAllSong, postSong, putSong, deleteSong } from '../../adminApi/songApi'; 
 import type { Participant } from '../../models/song';
 import { toast } from 'react-toastify';
 
@@ -41,18 +41,15 @@ export default function Song() {
     );
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value, type, files } = e.target as HTMLInputElement;
-        if (type === 'file' && files) {
-            setNewSong(prev => ({ ...prev, [name]: files[0] }));
-        } else {
-            setNewSong(prev => ({ ...prev, [name]: value }));
-            // Validate title khi người dùng nhập
-            if (name === 'title') {
-                if (!value.trim()) {
-                    setTitleError('Tiêu đề bài hát không được để trống');
-                } else {
-                    setTitleError('');
-                }
+        const { name, value } = e.target;
+        setNewSong(prev => ({ ...prev, [name]: value }));
+        
+        // Validate title khi người dùng nhập
+        if (name === 'title') {
+            if (!value.trim()) {
+                setTitleError('Tiêu đề bài hát không được để trống');
+            } else {
+                setTitleError('');
             }
         }
     };
@@ -75,14 +72,8 @@ export default function Song() {
                 return;
             }
 
-            const formData = new FormData();
-            Object.entries(newSong).forEach(([key, value]) => {
-                if (value !== null && value !== undefined) {
-                    formData.append(key, value);
-                }
-            });
-            await postSong(formData);
-            fetchData();
+            const created = await postSong(newSong);
+            setSongs(prev => [...prev, created]);
             toast.success('Thêm bài hát thành công!');
             setShowForm(false);
             // Reset form
@@ -95,6 +86,8 @@ export default function Song() {
                 audio_file: '',
                 video_file: ''
             });
+            // Reload lại danh sách
+            //fetchData();
         } catch (e) {
             toast.error('Có lỗi khi thêm bài hát!');
         }

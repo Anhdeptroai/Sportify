@@ -54,11 +54,12 @@ export default function Participant() {
 
     const handleSubmit = async () => {
         try {
-            await postParticipant(newParticipant);
+            const created = await postParticipant(newParticipant);
+            setParticipants(prev => [...prev, created]);
             toast.success('Thêm participant thành công!');
             setShowForm(false);
             // reload lại danh sách participant
-            fetchData();
+            //fetchData();
         } catch (e) {
             toast.error('Có lỗi khi thêm participant!');
         }
@@ -83,7 +84,7 @@ export default function Participant() {
             setShowEdit(false);
             setEditParticipant(null);
             toast.success('Cập nhật participant thành công!');
-            fetchData();
+            //fetchData();
         } catch (error) {
            toast.error('Có lỗi khi cập nhật participant!');
         }

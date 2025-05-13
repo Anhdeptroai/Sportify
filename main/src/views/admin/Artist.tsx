@@ -106,7 +106,7 @@ export default function Artist() {
     try {
       const updated = await putArtist(editArtist.id, editArtist);
       setArtists(prev => prev.map(a => a.id === updated.id ? updated : a));
-      await fetchData();
+//      await fetchData();
       setShowEdit(false);
       setEditArtist(null);
       toast.success('Cập nhật nghệ sĩ thành công!');
