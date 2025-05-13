@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { getAllArtists, postArtist, putArtist, deleteArtist } from '../../adminApi/artistApi'; // Adjust the import path as necessary
 import { toast } from 'react-toastify';
@@ -7,10 +6,15 @@ export default function Artist() {
   const [artists, setArtists] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
-  const [newArtist, setNewArtist] = useState({ name: '', profile_picture: '', followers_count: 0, biography: '' });
+  const [newArtist, setNewArtist] = useState({
+    name: '',
+    profile_picture: '',
+    followers_count: 0,
+    biography: ''
+  });
   const [showEdit, setShowEdit] = useState<boolean>(false);
   const [editArtist, setEditArtist] = useState<any>(null);
-
+  const [nameError, setNameError] = useState('');
 
   const fetchData = async ()=> {
     const res = await getAllArtists();
@@ -19,7 +23,6 @@ export default function Artist() {
   useEffect(() => {
     fetchData();
   }, []);
-
 
   // Filter artists by name
   const filteredArtists = artists.filter(artist =>
@@ -32,21 +35,58 @@ export default function Artist() {
       ...prev,
       [name]: name === 'followers_count' ? parseInt(value) : value
     }));
+    // Validate name khi người dùng nhập
+    if (name === 'name') {
+      if (!value.trim()) {
+        setNameError('Tên nghệ sĩ không được để trống');
+      } else {
+        setNameError('');
+      }
+    }
   };
   const handleAddClick = () => setShowForm(true);
   const handleCancel = () => {
     setShowForm(false);
-    setNewArtist({ name: '', profile_picture: '', followers_count: 0, biography: '' });
+    setNewArtist({
+      name: '',
+      profile_picture: '',
+      followers_count: 0,
+      biography: ''
+    });
   };
   const handleSubmit = async () => {
     try {
+      // Validate name trước khi submit
+      if (!newArtist.name.trim()) {
+        setNameError('Tên nghệ sĩ không được để trống');
+        return;
+      }
+
+      // Kiểm tra artist đã tồn tại
+      const isDuplicate = artists.some(artist => 
+        artist.name.toLowerCase() === newArtist.name.toLowerCase()
+      );
+
+      if (isDuplicate) {
+        toast.error('Nghệ sĩ này đã tồn tại trong hệ thống!');
+        return;
+      }
+
       const created = await postArtist(newArtist);
       setArtists(prev => [...prev, created]);
-      handleCancel();
+      toast.success('Thêm nghệ sĩ thành công!');
+      setShowForm(false);
+      setNewArtist({
+        name: '',
+        profile_picture: '',
+        followers_count: 0,
+        biography: ''
+      }); // Reset form
+
+      // Reload lại danh sách artist
       fetchData();
-      toast.success('Artist added successfully');
-   } catch (error) {
-      console.error('Error adding artist:', error);
+    } catch (e) {
+      toast.error('Có lỗi khi thêm nghệ sĩ!');
     }
   };
 
@@ -149,11 +189,21 @@ export default function Artist() {
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-4">
           <h3 className="text-lg mb-4">Add New Artist</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text" name="name" placeholder="Name" value={newArtist.name}
-              onChange={handleInputChange}
-              className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div>
+              <input
+                type="text"
+                name="name"
+                placeholder="Name"
+                value={newArtist.name}
+                onChange={handleInputChange}
+                className={`bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full ${
+                  nameError ? 'border-2 border-red-500' : ''
+                }`}
+              />
+              {nameError && (
+                <p className="text-red-500 text-sm mt-1">{nameError}</p>
+              )}
+            </div>
             <input
               type="text" name="profile_picture" placeholder="Profile Picture Path" value={newArtist.profile_picture}
               onChange={handleInputChange}

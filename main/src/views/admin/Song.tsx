@@ -17,6 +17,7 @@ export default function Song() {
         audio_file: '',
         video_file: ''
     });
+    const [titleError, setTitleError] = useState('');
     const [albums, setAlbums] = useState<any[]>([]);
     const [showEdit, setShowEdit] = useState(false);
     const [editSong, setEditSong] = useState<any>(null);
@@ -45,11 +46,35 @@ export default function Song() {
             setNewSong(prev => ({ ...prev, [name]: files[0] }));
         } else {
             setNewSong(prev => ({ ...prev, [name]: value }));
+            // Validate title khi người dùng nhập
+            if (name === 'title') {
+                if (!value.trim()) {
+                    setTitleError('Tiêu đề bài hát không được để trống');
+                } else {
+                    setTitleError('');
+                }
+            }
         }
     };
 
     const handleSubmit = async () => {
         try {
+            // Validate title trước khi submit
+            if (!newSong.title.trim()) {
+                setTitleError('Tên bài hát không được để trống');
+                return;
+            }
+
+            // Check for duplicate song
+            const isDuplicate = songs.some(song => 
+                song.title.toLowerCase() === newSong.title.toLowerCase()
+            );
+
+            if (isDuplicate) {
+                toast.error('Bài hát đã tồn tại!');
+                return;
+            }
+
             const formData = new FormData();
             Object.entries(newSong).forEach(([key, value]) => {
                 if (value !== null && value !== undefined) {
@@ -60,10 +85,18 @@ export default function Song() {
             fetchData();
             toast.success('Thêm bài hát thành công!');
             setShowForm(false);
-            // reload lại danh sách song
-            
+            // Reset form
+            setNewSong({
+                title: '',
+                album: '',
+                duration: '',
+                gener: '',
+                image: '',
+                audio_file: '',
+                video_file: ''
+            });
         } catch (e) {
-          toast.error('Có lỗi khi thêm bài hát!');
+            toast.error('Có lỗi khi thêm bài hát!');
         }
     };
 
@@ -105,7 +138,7 @@ export default function Song() {
             toast.success('Xóa bài hát thành công!');
             fetchData();
           } catch (err) {
-            toast.success('Có lỗi khi xóa bài hát!');
+            toast.error('Có lỗi khi xóa bài hát!');
           }
        }
     };
@@ -171,14 +204,21 @@ export default function Song() {
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-4">
           <h3 className="text-lg mb-4">Add New Song</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="title"
-              placeholder="Title"
-              value={newSong.title}
-              onChange={handleInputChange}
-              className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div>
+              <input
+                type="text"
+                name="title"
+                placeholder="Title"
+                value={newSong.title}
+                onChange={handleInputChange}
+                className={`bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full ${
+                  titleError ? 'border-2 border-red-500' : ''
+                }`}
+              />
+              {titleError && (
+                <p className="text-red-500 text-sm mt-1">{titleError}</p>
+              )}
+            </div>
             <select
               name="album"
               value={newSong.album}

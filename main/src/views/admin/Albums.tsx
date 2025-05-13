@@ -19,7 +19,7 @@ export default function Albums() {
     const [artists, setArtists] = useState<any[]>([]);
     const [showEdit, setShowEdit] = useState(false);
     const [editAlbum, setEditAlbum] = useState<any>(null);
-
+    const [titleError, setTitleError] = useState('');
  
         const fetchData = async () => {
             const album = await getAllAlbum();
@@ -57,10 +57,34 @@ export default function Albums() {
             ...prev,
             [name]: value
         }));
+        // Validate title khi người dùng nhập
+        if (name === 'title') {
+            if (!value.trim()) {
+                setTitleError('Tên album không được để trống');
+            } else {
+                setTitleError('');
+            }
+        }
     };
 
     const handleSubmit = async () => {
         try {
+            // Validate title trước khi submit
+            if (!newAlbum.title.trim()) {
+                setTitleError('Tên album không được để trống');
+                return;
+            }
+
+            // Kiểm tra album đã tồn tại
+            const isDuplicate = albums.some(album => 
+                album.title.toLowerCase() === newAlbum.title.toLowerCase()
+            );
+
+            if (isDuplicate) {
+                toast.error('Album này đã tồn tại trong hệ thống!');
+                return;
+            }
+
             const created = await postAlbum(newAlbum);
             setArtists(prev => [...prev, created]);
             toast.success('Thêm album thành công!');
@@ -75,8 +99,6 @@ export default function Albums() {
 
             // Reload lại danh sách album
             fetchData();
-
-            
         } catch (e) {
             toast.error('Có lỗi khi thêm album!');
         }
@@ -184,14 +206,21 @@ export default function Albums() {
                 <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-4">
                     <h3 className="text-lg mb-4">Add New Album</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input
-                            type="text"
-                            name="title"
-                            placeholder="Title"
-                            value={newAlbum.title}
-                            onChange={handleInputChange}
-                            className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                        <div>
+                            <input
+                                type="text"
+                                name="title"
+                                placeholder="Title"
+                                value={newAlbum.title}
+                                onChange={handleInputChange}
+                                className={`bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full ${
+                                    titleError ? 'border-2 border-red-500' : ''
+                                }`}
+                            />
+                            {titleError && (
+                                <p className="text-red-500 text-sm mt-1">{titleError}</p>
+                            )}
+                        </div>
                         <input
                             type="text"
                             name="description"

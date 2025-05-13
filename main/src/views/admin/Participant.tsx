@@ -60,7 +60,7 @@ export default function Participant() {
             // reload lại danh sách participant
             fetchData();
         } catch (e) {
-            toast.success('Có lỗi khi thêm participant!');
+            toast.error('Có lỗi khi thêm participant!');
         }
     };
 
