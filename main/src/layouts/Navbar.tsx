@@ -70,8 +70,8 @@ const Navbar = () => {
         };
 
         checkAuth();
-        // Kiểm tra token mỗi 5 phút
-        const interval = setInterval(checkAuth, 5 * 60 * 1000);
+        // Kiểm tra token mỗi 60 phút
+        const interval = setInterval(checkAuth, 60 * 60 * 1000);
         return () => clearInterval(interval);
     }, []);
 

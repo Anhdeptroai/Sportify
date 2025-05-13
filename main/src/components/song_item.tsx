@@ -9,7 +9,7 @@ interface SongItemProps extends Song {
     onClick?: () => void;
 }
 
-const Song_item = ({id, title, duration, genre, audio_file, image, album, participants, interactions, onClick }: SongItemProps) => {
+const Song_item = ({id, title, duration, genre, audio_file, video_file, image, album, participants, interactions, onClick }: SongItemProps) => {
 
     const navigate = useNavigate();
     const {playWithId} = useContext(PlayerContext);

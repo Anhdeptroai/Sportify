@@ -46,8 +46,14 @@ const PlayerContextProvider: React.FC<React.PropsWithChildren> = ({children}) =>
             try {
                 const res = await axios.get('http://13.215.205.59:8000/api/songs/');
                 setSongs(res.data);
+                const lastTrackId = localStorage.getItem('currentTrackId');
+                let songToSet = res.data[0];
+                if (lastTrackId) {
+                    const found = res.data.find((s: Song) => s.id === Number(lastTrackId));
+                    if (found) songToSet = found;
+                }
                 if (res.data.length > 0 && !track) {
-                    setTrack(res.data[0]);
+                    setTrack(songToSet);
                 }
             } catch (err) {
                 console.error("Lỗi khi lấy bài hát", err);
@@ -55,6 +61,12 @@ const PlayerContextProvider: React.FC<React.PropsWithChildren> = ({children}) =>
         };
         fetchSongs();
     }, []);
+
+    useEffect(() => {
+        if (track && track.id) {
+            localStorage.setItem('currentTrackId', String(track.id));
+        }
+    }, [track]);
 
     const play = () => {
         if (audioRef.current) {

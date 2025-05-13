@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
-import { FaHeart } from 'react-icons/fa';
+import { FaDownload, FaHeart } from 'react-icons/fa';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { PlayerContext } from '../controllers/context.tsx';
@@ -18,7 +18,7 @@ const Song_now = () => {
     const navigate = useNavigate();
     const [songs, setSongs] = useState<Song[]>([]);
     const { audioRef } = useContext(PlayerContext);
-    const { playlists, addSongToPlaylist } = useContext(PlaylistContext);
+    const { playlists, addSongToPlaylist, filterPlaylistsByUser } = useContext(PlaylistContext);
     const [showAdd, setShowAdd] = useState(false);
     const [selectedPlaylist, setSelectedPlaylist] = useState<number | null>(null);
     const [adding, setAdding] = useState(false);
@@ -80,6 +80,23 @@ const Song_now = () => {
         setIsFavorite(!isFavorite);
     };
 
+    const handleDownload = () => {
+        if (!Song_item) return;
+        const downloadUrl = `http://13.215.205.59/msa/track/${Song_item.audio_file}`;
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${Song_item.title}.mp3`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    // Lấy userId từ localStorage
+    const userIdStr = localStorage.getItem('user_id');
+    const userId = userIdStr ? Number(userIdStr) : null;
+    // Lọc playlist theo user
+    const userPlaylists = userId ? filterPlaylistsByUser(userId) : [];
+
     if (!Song_item) {
         return (
             <>
@@ -112,6 +129,9 @@ const Song_now = () => {
                             <button onClick={handleToggleFavorite} className="focus:outline-none">
                                 <FaHeart className={isFavorite ? 'text-red-500 text-2xl' : 'text-white text-2xl'} />
                             </button>
+                            <button onClick={handleDownload} className="focus:outline-none">
+                                <FaDownload className="text-white text-2xl hover:text-green-500" />
+                            </button>
                         </div>
                         {showAdd && Song_item && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -124,7 +144,7 @@ const Song_now = () => {
                                         onChange={e => setSelectedPlaylist(Number(e.target.value))}
                                     >
                                         <option value="" disabled>-- Chọn playlist --</option>
-                                        {playlists.map(pl => (
+                                        {userPlaylists.map(pl => (
                                             <option key={pl.id} value={pl.id}>{pl.title}</option>
                                         ))}
                                     </select>

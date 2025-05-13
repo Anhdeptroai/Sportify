@@ -98,6 +98,7 @@ const Login = () => {
         
         // Chuyển hướng về trang chủ
         navigate('/');
+        window.location.reload();
       } else {
         throw new Error('Token không hợp lệ');
       }

@@ -92,10 +92,12 @@ const Register = () => {
     try {
       // Chuẩn bị dữ liệu gửi lên server
       const registerData = {
+        username: formData.username,
         email: formData.email,
         password: formData.password,
-        // Có thể thêm các trường khác nếu backend yêu cầu
       };
+
+      console.log('Registering with data:', registerData);
 
       // Gọi API đăng ký
       const response = await axios.post(
@@ -108,18 +110,30 @@ const Register = () => {
         }
       );
 
+      console.log('Register response:', response.data);
+
       if (response.data) {
         toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
         navigate("/login");
       }
     } catch (error: any) {
+      console.error('Register error:', error);
+      
       if (error.response) {
+        console.log('Error response:', error.response.data);
         const errorData = error.response.data;
+        
+        if (errorData.username) {
+          setErrors(prev => ({ ...prev, username: errorData.username[0] }));
+          toast.error(errorData.username[0]);
+        }
         if (errorData.email) {
           setErrors(prev => ({ ...prev, email: errorData.email[0] }));
+          toast.error(errorData.email[0]);
         }
         if (errorData.password) {
           setErrors(prev => ({ ...prev, password: errorData.password[0] }));
+          toast.error(errorData.password[0]);
         }
         if (errorData.detail) {
           toast.error(errorData.detail);
@@ -127,8 +141,10 @@ const Register = () => {
           toast.error("Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
         }
       } else if (error.request) {
+        console.log('No response received:', error.request);
         toast.error("Không thể kết nối đến server. Vui lòng thử lại sau.");
       } else {
+        console.log('Error setting up request:', error.message);
         toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
       }
     } finally {
@@ -228,43 +244,19 @@ const Register = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full bg-green-500 text-white py-2 mt-2 rounded-full font-bold hover:bg-green-600 transition-colors ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className="w-full bg-green-500 text-white py-2 rounded-full hover:bg-green-600 transition-colors disabled:opacity-50"
           >
-            {isLoading ? "Đang xử lý..." : "Đăng ký"}
+            {isLoading ? "Đang đăng ký..." : "Đăng ký"}
           </button>
         </form>
-        
-        <div className="flex items-center my-4">
-          <hr className="flex-grow border-gray-500" />
-          <span className="px-2 text-gray-300 text-sm">hoặc</span>
-          <hr className="flex-grow border-gray-500" />
-        </div>
 
-        <div className="mt-6 space-y-3">
-          <button
-            onClick={handleGoogleSignup}
-            className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-500 rounded-full text-white hover:bg-gray-700 transition-colors"
-          >
-            <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" className="h-5 w-5" />
-            Đăng ký bằng Google
-          </button>
-          <button
-            onClick={handlePhoneSignup}
-            className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-500 rounded-full text-white hover:bg-gray-700 transition-colors"
-          >
-            Đăng ký bằng số điện thoại
-          </button>
-        </div>
-
-        <hr className="my-6 border-gray-600" />
-
-        <div className="text-center text-sm text-gray-400 mt-4">
-          Bạn đã có tài khoản?{" "}
-          <Link to="/login" className="text-white font-bold hover:underline">
-            Đăng Nhập Spotify
-          </Link>
+        <div className="mt-4 text-center">
+          <p className="text-gray-400">
+            Đã có tài khoản?{' '}
+            <Link to="/login" className="text-white hover:underline">
+              Đăng nhập
+            </Link>
+          </p>
         </div>
       </div>
     </div>
