@@ -14,3 +14,7 @@ export const putParticipant = async (id: number | string, participant: any) => {
   const response = await axios.put(`http://13.215.205.59:8000/api/participants/${id}/`, participant);
   return response.data;
 };
+export const deleteParticipant = async (id: number ) => {
+  return await axios.delete(`http://13.215.205.59:8000/api/participants/${id}/`);
+};
+

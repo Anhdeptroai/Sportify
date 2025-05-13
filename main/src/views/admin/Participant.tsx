@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { getAllParticipant, postParticipant, putParticipant } from '../../adminApi/participantApi';
+import { getAllParticipant, postParticipant, putParticipant, deleteParticipant } from '../../adminApi/participantApi';
 import { getAllArtists } from '../../adminApi/artistApi';
 import { getAllSong } from '../../adminApi/songApi';
+import { toast } from 'react-toastify';
 
 export default function Participant() {
     const [participants, setParticipants] = useState<any[]>([]);
@@ -18,14 +19,23 @@ export default function Participant() {
     const [showEdit, setShowEdit] = useState(false);
     const [editParticipant, setEditParticipant] = useState<any>(null);
 
-    useEffect(() => {
+/*    useEffect(() => {
         const fetchData = async () => {
             const participant = await getAllParticipant();
             setParticipants(participant);
         };
         fetchData();
     }, []);
-
+*/
+    const fetchData = async () => {
+      const participant = await getAllParticipant();
+      setParticipants(participant);
+    }; 
+    
+    useEffect(() => {
+        fetchData();
+    }, []);
+    
     useEffect(() => {
         getAllArtists().then(setArtists);
         getAllSong().then(setSongs);
@@ -44,12 +54,14 @@ export default function Participant() {
 
     const handleSubmit = async () => {
         try {
-            await postParticipant(newParticipant);
-            alert('Thêm participant thành công!');
+            const created = await postParticipant(newParticipant);
+            setParticipants(prev => [...prev, created]);
+            toast.success('Thêm participant thành công!');
             setShowForm(false);
             // reload lại danh sách participant
+            //fetchData();
         } catch (e) {
-            alert('Có lỗi khi thêm participant!');
+            toast.error('Có lỗi khi thêm participant!');
         }
     };
 
@@ -71,9 +83,10 @@ export default function Participant() {
             setParticipants(prev => prev.map(p => p.id === updated.id ? updated : p));
             setShowEdit(false);
             setEditParticipant(null);
-            alert('Cập nhật participant thành công!');
-        } catch (err) {
-            alert('Có lỗi khi cập nhật participant!');
+            toast.success('Cập nhật participant thành công!');
+            //fetchData();
+        } catch (error) {
+           toast.error('Có lỗi khi cập nhật participant!');
         }
     };
 
@@ -86,7 +99,20 @@ export default function Participant() {
     const filteredParticipants = participants.filter(participant =>
         participant.artist_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
- 
+    
+    const handleDelete = async (id: number) => {
+       if(window.confirm('Are you sure you want to delete this participant?')){
+           try {
+            await deleteParticipant(id);
+            toast.success('Xóa participant thành công!');
+            setParticipants(prev => prev.filter(participant => participant.id !== id));
+        } catch (err) {
+            toast.success('Có lỗi khi xóa participant!');
+        }
+       }
+    };
+
+
   return (
  
     <div>
@@ -160,8 +186,8 @@ export default function Participant() {
                 />
               </div>
               <div className="mt-4 flex justify-end gap-2">
-                <button onClick={handleCancel} className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded">Cancel</button>
-                <button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded">Save</button>
+                <button onClick={handleCancel} className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded cursor-pointer">Cancel</button>
+                <button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded cursor-pointer">Save</button>
               </div>
             </div>
           )}
@@ -191,12 +217,15 @@ export default function Participant() {
               <td className="p-2 border">
                 <div className="flex gap-2 justify-center">
                   <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded cursor-pointer"
                     onClick={() => handleEditClick(participant)}
                   >
                     Edit
                   </button>
-                  <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
+                  <button 
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded cursor-pointer"
+                    onClick = {() => handleDelete(participant.id)}
+                    >
                     Delete
                   </button>
                 </div>
@@ -239,19 +268,19 @@ export default function Participant() {
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={handleEditCancel}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleEditSave}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold"
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold cursor-pointer"
               >
                 Save
               </button>
             </div>
             <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl"
+              className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl cursor-pointer"
               onClick={handleEditCancel}
             >
               ×

@@ -14,3 +14,6 @@ export const putUser = async (id: number, user: any) => {
   const response = await axios.put(`http://13.215.205.59:8000/api/users/${id}/`, user);
   return response.data;
 };
+export const deleteUser = async (id: number) => {
+   return await axios.delete(`http://13.215.205.59:8000/api/users/${id}/`);
+};  

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { getAllAlbum } from '../../adminApi/albumApi'; // Adjust the import path as necessary
-import { getAllSong, postSong, putSong } from '../../adminApi/songApi'; // Adjust the import path as necessary
+import { getAllAlbum } from '../../adminApi/albumApi'; 
+import { getAllSong, postSong, putSong, deleteSong } from '../../adminApi/songApi'; 
 import type { Participant } from '../../models/song';
+import { toast } from 'react-toastify';
 
 export default function Song() {
     const [songs, setSongs] = useState<any[]>([]);
@@ -13,20 +14,23 @@ export default function Song() {
         duration: '',
         gener: '',
         image: '',
-        audio_file: ''
+        audio_file: '',
+        video_file: ''
     });
+    const [titleError, setTitleError] = useState('');
     const [albums, setAlbums] = useState<any[]>([]);
     const [showEdit, setShowEdit] = useState(false);
     const [editSong, setEditSong] = useState<any>(null);
 
+    
+    const fetchData = async () => {
+      const song = await getAllSong();
+      setSongs(song);
+    };
+  
     useEffect(() => {
-        const fetchData = async () => {
-            const song = await getAllSong();
-            setSongs(song);
-        };
         fetchData();
     }, []);
-
     useEffect(() => {
         getAllAlbum().then(setAlbums);
     }, []);
@@ -37,28 +41,55 @@ export default function Song() {
     );
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value, type, files } = e.target as HTMLInputElement;
-        if (type === 'file' && files) {
-            setNewSong(prev => ({ ...prev, [name]: files[0] }));
-        } else {
-            setNewSong(prev => ({ ...prev, [name]: value }));
+        const { name, value } = e.target;
+        setNewSong(prev => ({ ...prev, [name]: value }));
+        
+        // Validate title khi người dùng nhập
+        if (name === 'title') {
+            if (!value.trim()) {
+                setTitleError('Tiêu đề bài hát không được để trống');
+            } else {
+                setTitleError('');
+            }
         }
     };
 
     const handleSubmit = async () => {
         try {
-            const formData = new FormData();
-            Object.entries(newSong).forEach(([key, value]) => {
-                if (value !== null && value !== undefined) {
-                    formData.append(key, value);
-                }
-            });
-            await postSong(formData);
-            alert('Thêm bài hát thành công!');
+            // Validate title trước khi submit
+            if (!newSong.title.trim()) {
+                setTitleError('Tên bài hát không được để trống');
+                return;
+            }
+
+            // Check for duplicate song
+            const isDuplicate = songs.some(song => 
+                song.title.toLowerCase() === newSong.title.toLowerCase()
+            );
+
+            if (isDuplicate) {
+                toast.error('Bài hát đã tồn tại!');
+                return;
+            }
+
+            const created = await postSong(newSong);
+            setSongs(prev => [...prev, created]);
+            toast.success('Thêm bài hát thành công!');
             setShowForm(false);
-            // reload lại danh sách song
+            // Reset form
+            setNewSong({
+                title: '',
+                album: '',
+                duration: '',
+                gener: '',
+                image: '',
+                audio_file: '',
+                video_file: ''
+            });
+            // Reload lại danh sách
+            //fetchData();
         } catch (e) {
-            alert('Có lỗi khi thêm bài hát!');
+            toast.error('Có lỗi khi thêm bài hát!');
         }
     };
 
@@ -80,9 +111,10 @@ export default function Song() {
             setSongs(prev => prev.map(s => s.id === updated.id ? updated : s));
             setShowEdit(false);
             setEditSong(null);
-            alert('Cập nhật bài hát thành công!');
+            toast.success('Cập nhật bài hát thành công!');
+            fetchData();
         } catch (err) {
-            alert('Có lỗi khi cập nhật bài hát!');
+          toast.success('Có lỗi khi cập nhật bài hát!');
         }
     };
 
@@ -90,6 +122,20 @@ export default function Song() {
         setShowEdit(false);
         setEditSong(null);
     };
+
+    const handleDelete = async (id: number) => {
+       if(window.confirm('Bạn có chắc chắn muốn xóa bài hát này?')) {
+          try {
+            await deleteSong(id);
+            setSongs(prev => prev.filter(song => song.id !== id));
+            toast.success('Xóa bài hát thành công!');
+            fetchData();
+          } catch (err) {
+            toast.error('Có lỗi khi xóa bài hát!');
+          }
+       }
+    };
+
 
   return (
  
@@ -151,14 +197,21 @@ export default function Song() {
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-4">
           <h3 className="text-lg mb-4">Add New Song</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="title"
-              placeholder="Title"
-              value={newSong.title}
-              onChange={handleInputChange}
-              className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div>
+              <input
+                type="text"
+                name="title"
+                placeholder="Title"
+                value={newSong.title}
+                onChange={handleInputChange}
+                className={`bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full ${
+                  titleError ? 'border-2 border-red-500' : ''
+                }`}
+              />
+              {titleError && (
+                <p className="text-red-500 text-sm mt-1">{titleError}</p>
+              )}
+            </div>
             <select
               name="album"
               value={newSong.album}
@@ -200,10 +253,19 @@ export default function Song() {
               onChange={handleInputChange}
               className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+             <input
+              type="text"
+              name="video_file"
+              placeholder="Video File Path"
+              value={newSong.video_file}
+              onChange={handleInputChange}
+              className="bg-gray-700 text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
+          
           <div className="mt-4 flex justify-end gap-2">
-            <button onClick={() => setShowForm(false)} className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded">Cancel</button>
-            <button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded">Save</button>
+            <button onClick={() => setShowForm(false)} className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded cursor-pointer">Cancel</button>
+            <button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded cursor-pointer">Save</button>
           </div>
         </div>
       )}
@@ -261,22 +323,30 @@ export default function Song() {
               placeholder="Audio File Path"
               className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <input
+              type="text"
+              name="video_file"
+              value={editSong.video_file}
+              onChange={handleEditInputChange}
+              placeholder="Video File Path"
+              className="w-full mb-3 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={handleEditCancel}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleEditSave}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold"
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold cursor-pointer"
               >
                 Save
               </button>
             </div>
             <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl"
+              className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl cursor-pointer"
               onClick={handleEditCancel}
             >
               ×
@@ -331,13 +401,17 @@ export default function Song() {
               <td className="p-2 border">
                 <div className="flex gap-2 justify-center">
                   <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded cursor-pointer"
                     onClick={() => handleEditClick(song)}
                   >
                     Edit
                   </button>
-                  <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">
+                  <button 
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded cursor-pointer"
+                    onClick={() => handleDelete(song.id)}
+                  >
                     Delete
+                    
                   </button>
                 </div>
               </td>

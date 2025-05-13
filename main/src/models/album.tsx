@@ -35,3 +35,4 @@ export interface Album {
     publish_date: string;
     artist: number;
 }
+
