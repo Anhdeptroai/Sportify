@@ -1,27 +1,29 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Footer from '../layouts/Footer';
 import Navbar from '../layouts/Navbar';
-
-interface UserData {
-    id: number;
-    email: string;
-    first_name: string;
-    last_name: string;
-    profile_picture: string | null;
-    subscription_type: string | null;
-}
+import { User } from '../models/user';
+// interface UserData {
+//     id: number;
+//     email: string;
+//     first_name: string;
+//     last_name: string;
+//     profile_picture: string | null;
+//     subscription_type: string | null;
+// }
 
 const Profile = () => {
     const navigate = useNavigate();
-    const [userData, setUserData] = useState<UserData>({
+    const [userData, setUserData] = useState<User>({
         id: 0,
         email: '',
         first_name: '',
         last_name: '',
         profile_picture: null,
-        subscription_type: null
+        subscription_type: null,
+        followees_count: 0
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -120,7 +122,9 @@ const Profile = () => {
                     last_name: userData.last_name,
                     email: userData.email,
                     profile_picture: userData.profile_picture,
-                    subscription_type: userData.subscription_type
+                    subscription_type: userData.subscription_type,
+                    followees_count: userData.followees_count,
+                    password: 123123,
                 },
                 {
                     headers: {
@@ -132,7 +136,7 @@ const Profile = () => {
 
             // Cập nhật lại state với dữ liệu mới từ server
             setUserData(response.data);
-            alert('Cập nhật thông tin thành công!');
+            toast.success('Cập nhật thông tin thành công!');
         } catch (error: any) {
             console.error('Lỗi khi cập nhật thông tin:', error);
             if (error.response) {

@@ -18,6 +18,7 @@ const Favourite = () => {
     const { audioRef } = useContext(PlayerContext);
     const { setTrack } = useContext(PlayerContext);
     const { user } = useContext(AuthContext);
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         if (user && user.id) {
@@ -44,7 +45,7 @@ const Favourite = () => {
         }
     }, [user]);
 
-    const handleRemoveFromFavourites = async (songId: number) => {
+    const handleRemoveFromFavourites = async (songId: number, token: string) => {
         if (!user) return;
 
         try {
@@ -63,7 +64,13 @@ const Favourite = () => {
             }
 
             // 2. Gọi DELETE đúng endpoint
-            await axios.delete(`http://13.215.205.59:8000/api/interactions/${interaction.id}/`);
+            await axios.delete(`http://13.215.205.59:8000/api/interactions/${interaction.id}/`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
             setSongs(prevSongs => prevSongs.filter(song => song.id !== songId));
             toast.success("Đã xóa khỏi danh sách yêu thích!");
         } catch (error) {
@@ -152,7 +159,11 @@ const Favourite = () => {
                                         <button 
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleRemoveFromFavourites(song.id);
+                                                if (token) {
+                                                    handleRemoveFromFavourites(song.id, token);
+                                                } else {
+                                                    toast.error("Token không tồn tại. Vui lòng đăng nhập lại!");
+                                                }
                                             }}
                                             className="text-white-500 hover:text-white-700"
                                         >

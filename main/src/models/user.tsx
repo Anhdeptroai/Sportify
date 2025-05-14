@@ -3,9 +3,10 @@ export interface User {
     email: string;
     first_name: string;
     last_name: string;
-    followees_count: number;
+    // followees_count: number;
     subscription_type: string | null;
     profile_picture: string | null;
+    followees_count: number;
 }
 
 // Type for user registration request
