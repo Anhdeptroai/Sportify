@@ -81,7 +81,7 @@ const Detailed_album = () => {
                         {Album_item.songs.map((song, index) => {
                             const picture_song = `http://13.215.205.59/msa/track_img/${song.image}`;
                             return (
-                                <div key={index} className="grid grid-cols-3 sm:grid-cols-4 mt-10 mb-4 pl-8 text-[#a7a7a7]"
+                                <div key={song.id} className="grid grid-cols-3 sm:grid-cols-4 mt-10 mb-4 pl-8 text-[#a7a7a7]"
                                     onClick={() => { navigate(`/song/${song.id}`); playWithId(song.id); }}>
                                     <p className='flex gap-5'>
                                         <b>{index + 1}</b>

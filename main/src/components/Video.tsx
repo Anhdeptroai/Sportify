@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import Navbar from '../layouts/Navbar.tsx';
 import Player from '../layouts/Player.tsx';
@@ -5,17 +6,23 @@ import Sidebar from '../layouts/Sidebar.tsx';
 
 function Video() {
     const [currentSong, setCurrentSong] = useState<any>(null);
+    const [songs, setSongs] = useState<any[]>([]);
 
     useEffect(() => {
-        const songData = localStorage.getItem('currentSong');
-        if (songData) {
-            const song = JSON.parse(songData);
-            if (!song.video_file) {
-                song.video_file = null; 
-            }
-            setCurrentSong(song);
-        }
+        axios.get('http://13.215.205.59:8000/api/songs/')
+            .then(res => setSongs(res.data))
+            .catch(err => console.error("Lỗi khi lấy bài hát", err));
     }, []);
+
+    useEffect(() => {
+        const songIdStr = localStorage.getItem('currentTrackId');
+        if (songIdStr && songs.length > 0) {
+            const songId = Number(songIdStr);
+            const song = songs.find(s => s.id === songId);
+            if (song) setCurrentSong(song);
+            else setCurrentSong(null);
+        }
+    }, [songs]);
 
     if (!currentSong) {
         return (

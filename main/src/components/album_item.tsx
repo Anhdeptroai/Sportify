@@ -16,8 +16,7 @@ const Album_item = ({id, title, songs, description, creation_date, publish_date,
 
     return (
         <div key={id} className="bg-gray-800 items-center rounded-lg justify-center hover:bg-gray-700 p-4" 
-            onClick={() => {navigate(`/album/${id}`); 
-                            playWithId(id-2);}}>
+            onClick={() => { navigate(`/album/${id}`);}}>
             <div className="relative w-34 h-34">
                 <img src={albumImg} alt={title} className="w-34 h-34 object-cover rounded-full block mx-auto"/>
                 <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 rounded-full">

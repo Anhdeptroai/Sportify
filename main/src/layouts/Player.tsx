@@ -25,9 +25,10 @@ const Player = () => {
     const [isFavorite, setIsFavorite] = useState(false);
     const [loadingFavorite, setLoadingFavorite] = useState(true);
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-    const [showYoutube, setShowYoutube] = useState(false);
+
     const volumeSliderRef = useRef<HTMLDivElement>(null);
     const [favoriteInteractionId, setFavoriteInteractionId] = useState<number|null>(null);
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         // Load favorite songs from localStorage
@@ -76,22 +77,36 @@ const Player = () => {
         }
         setLoadingFavorite(true);
         try {
-            if (isFavorite && favoriteInteractionId) {
-                // Xóa khỏi server
-                await axios.delete(`http://13.215.205.59:8000/api/interactions/${favoriteInteractionId}/`);
+            // Lấy tất cả interaction
+            const res = await axios.get('http://13.215.205.59:8000/api/interactions/');
+            const interaction = res.data.find(
+                (item: any) =>
+                    item.user === userId &&
+                    item.song === track.id &&
+                    item.interaction_type === "favor"
+            );
+
+            if (interaction) {
+                // Đã yêu thích, xóa
+                await axios.delete(`http://13.215.205.59:8000/api/interactions/${interaction.id}/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 setIsFavorite(false);
                 setFavoriteInteractionId(null);
                 toast.success('Đã xóa khỏi danh sách yêu thích!');
-            } else if (!isFavorite) {
-                // Thêm lên server
-                const res = await axios.post('http://13.215.205.59:8000/api/interactions/', {
+            } else {
+                // Chưa yêu thích, thêm mới
+                const resAdd = await axios.post('http://13.215.205.59:8000/api/interactions/', {
                     user: userId,
                     song: track.id,
                     interaction_type: "favor",
                     timestamp: new Date().toISOString()
                 });
                 setIsFavorite(true);
-                setFavoriteInteractionId(res.data.id);
+                setFavoriteInteractionId(resAdd.data.id);
                 toast.success('Đã thêm vào danh sách yêu thích!');
             }
         } catch (error) {
@@ -111,11 +126,7 @@ const Player = () => {
     const img = `http://13.215.205.59/msa/track_img/${track.image}`;
 
     return <>
-        {showYoutube && (
-            <div className="flex justify-center w-full bg-black py-4">
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/GMyF41IxReo?si=9N3IDx_0-4575LEp" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
-            </div>
-        )}
+        
         <div className="h-[10%] bg-gray-600 flex justify-between item-center text-white p-4">
             <div className="hidden lg:flex item-center gap-4">
                 <img className="w-12" src={img} alt="" />

@@ -152,14 +152,6 @@ const Register = () => {
     }
   };
 
-  const handleGoogleSignup = () => {
-    toast.info("Tính năng đang được phát triển");
-  };
-
-  const handlePhoneSignup = () => {
-    toast.info("Tính năng đang được phát triển");
-  };
-
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-900 to-black">
       <div className="bg-black p-8 rounded-lg shadow-lg w-96">

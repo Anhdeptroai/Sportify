@@ -26,6 +26,8 @@ const Song_now = () => {
     const [isFavorite, setIsFavorite] = useState(false);
     const [favoriteInteractionId, setFavoriteInteractionId] = useState<number|null>(null);
     const [loadingFavorite, setLoadingFavorite] = useState(true);
+    const token = localStorage.getItem('token');
+
 
     useEffect(() => {
         axios.get('http://13.215.205.59:8000/api/songs/')
@@ -104,20 +106,36 @@ const Song_now = () => {
         }
         setLoadingFavorite(true);
         try {
-            if (isFavorite && favoriteInteractionId) {
-                await axios.delete(`http://13.215.205.59:8000/api/interactions/${favoriteInteractionId}/`);
+            // Lấy tất cả interaction
+            const res = await axios.get('http://13.215.205.59:8000/api/interactions/');
+            const interaction = res.data.find(
+                (item: any) =>
+                    item.user === userId &&
+                    item.song === Song_item.id &&
+                    item.interaction_type === "favor"
+            );
+
+            if (interaction) {
+                // Đã yêu thích, xóa
+                await axios.delete(`http://13.215.205.59:8000/api/interactions/${interaction.id}/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 setIsFavorite(false);
                 setFavoriteInteractionId(null);
                 toast.success('Đã xóa khỏi yêu thích!');
-            } else if (!isFavorite) {
-                const res = await axios.post('http://13.215.205.59:8000/api/interactions/', {
+            } else {
+                // Chưa yêu thích, thêm mới
+                const resAdd = await axios.post('http://13.215.205.59:8000/api/interactions/', {
                     user: userId,
                     song: Song_item.id,
                     interaction_type: "favor",
                     timestamp: new Date().toISOString()
                 });
                 setIsFavorite(true);
-                setFavoriteInteractionId(res.data.id);
+                setFavoriteInteractionId(resAdd.data.id);
                 toast.success('Đã thêm vào yêu thích!');
             }
         } catch (error) {

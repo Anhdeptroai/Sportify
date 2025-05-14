@@ -14,9 +14,14 @@ const Song_item = ({id, title, duration, genre, audio_file, video_file, image, a
     const navigate = useNavigate();
     const {playWithId} = useContext(PlayerContext);
 
+    const handleClick = () => {
+        if (onClick) onClick();
+        navigate(`/song/${id}`);
+    };
+
     return (
         <div key={id} className="bg-gray-800 items-center rounded-lg justify-center hover:bg-gray-700 p-4" 
-            onClick={onClick}
+            onClick={handleClick}
         >
             <div className="relative w-34 h-34">
                 <img src={image} alt={title} className="w-34 h-34 object-cover rounded-full block mx-auto"/>
