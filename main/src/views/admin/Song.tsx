@@ -35,26 +35,27 @@ export default function Song() {
         getAllAlbum().then(setAlbums);
     }, []);
 
-    // Filter songs by search term
+    // Filter songs by title
     const filteredSongs = songs.filter(song =>
         song.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setNewSong(prev => ({ ...prev, [name]: value }));
-        
-        // Validate title khi người dùng nhập
-        if (name === 'title') {
-            if (!value.trim()) {
-                setTitleError('Tiêu đề bài hát không được để trống');
-            } else {
-                setTitleError('');
-            }
-        }
+      const {name, value } = e.target;
+      setNewSong(prev => ({ ...prev, [name]: value }));
+      // Validate title khi người dùng nhập
+      if (name === 'title') {
+          if (!value.trim()) {
+              setTitleError('Tiêu đề bài hát không được để trống');
+          } else {
+              setTitleError('');
+          }
+      }
     };
 
-    const handleSubmit = async () => {
+
+      const handleSubmit = async () => {
         try {
             // Validate title trước khi submit
             if (!newSong.title.trim()) {
@@ -114,7 +115,7 @@ export default function Song() {
             toast.success('Cập nhật bài hát thành công!');
             fetchData();
         } catch (err) {
-          toast.success('Có lỗi khi cập nhật bài hát!');
+            toast.error('Có lỗi khi cập nhật bài hát!');
         }
     };
 

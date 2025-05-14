@@ -8,6 +8,7 @@ export default function Participant() {
     const [participants, setParticipants] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [showForm, setShowForm] = useState<boolean>(false);
+    const [songs, setSongs] = useState<any[]>([]);
     const [newParticipant, setNewParticipant] = useState({
         artist: '',
         song: '',
@@ -15,7 +16,6 @@ export default function Participant() {
         artist_name: ''
     });
     const [artists, setArtists] = useState<any[]>([]);
-    const [songs, setSongs] = useState<any[]>([]);
     const [showEdit, setShowEdit] = useState(false);
     const [editParticipant, setEditParticipant] = useState<any>(null);
 
@@ -40,6 +40,12 @@ export default function Participant() {
         getAllArtists().then(setArtists);
         getAllSong().then(setSongs);
     }, []);
+  
+    // Filter users by Artist name
+    const filteredParticipants = participants.filter(participant =>
+        participant.artist_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -95,11 +101,7 @@ export default function Participant() {
         setEditParticipant(null);
     };
 
-    // Filter users by Artist name
-    const filteredParticipants = participants.filter(participant =>
-        participant.artist_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
+   
     const handleDelete = async (id: number) => {
        if(window.confirm('Are you sure you want to delete this participant?')){
            try {

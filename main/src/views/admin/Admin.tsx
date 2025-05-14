@@ -13,20 +13,16 @@ export default function Admin() {
     const [selectedTab, setSelectedTab] = useState('Song');
     const navigate = useNavigate();
 
-   // ✅ Hàm xử lý logout
+   //  Hàm xử lý logout
     const handleLogout = () => {
     // Xóa token hoặc dữ liệu đăng nhập nếu có
-    localStorage.removeItem('accessToken'); // hoặc sessionStorage.removeItem('accessToken')
+    //localStorage.removeItem('accessToken'); 
+    // hoặc sessionStorage.removeItem('accessToken')
 
     // Chuyển hướng về trang login
     navigate('/login');
     };
  
-    
- 
- 
-
-   
     return (
       <div className="flex h-screen bg-gray-900 text-gray-200">
         {/* Navbar cố định bên trái - Giả sử chiều rộng là 64 (16rem) */}
