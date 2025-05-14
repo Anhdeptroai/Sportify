@@ -21,10 +21,10 @@ export default function Albums() {
     const [editAlbum, setEditAlbum] = useState<any>(null);
     const [titleError, setTitleError] = useState('');
  
-        const fetchData = async () => {
-            const album = await getAllAlbum();
-            setAlbums(album);
-        };
+    const fetchData = async () => {
+        const album = await getAllAlbum();
+        setAlbums(album);   
+    };    
     useEffect(() =>{
         fetchData();
     },[]); 
@@ -51,6 +51,16 @@ export default function Albums() {
         album.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const handleCancel = () => {
+        setShowForm(false);
+        setNewAlbum({
+            title: '',
+            description: '',
+            creation_date: '',
+            publish_date: '',
+            artist: ''
+        });
+    };    
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setNewAlbum(prev => ({
@@ -107,13 +117,7 @@ export default function Albums() {
     const handleEditClick = (album: any) => {
         setEditAlbum(album);
         setShowEdit(true);
-        setNewAlbum({
-            title: album.title,
-            description: album.description,
-            creation_date: album.creation_date,
-            publish_date: album.publish_date,
-            artist: album.artist
-        });
+       
     };
 
     const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -256,7 +260,7 @@ export default function Albums() {
                         </select>
                     </div>
                     <div className="mt-4 flex justify-end gap-2">
-                        <button onClick={() => setShowForm(false)} className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded cursor-pointer">Cancel</button>
+                        <button onClick={handleCancel} className="bg-gray-500 hover:bg-gray-600 text-white py-1 px-4 rounded cursor-pointer">Cancel</button>
                         <button onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded cursor-pointer">Save</button>
                     </div>
                 </div>
