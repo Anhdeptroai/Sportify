@@ -18,6 +18,7 @@ import Song_now from "../views/Song_now.tsx";
 import Video from '../views/Video.tsx';
 import Song from "../views/admin/Song.tsx"
 import Admin from "../views/admin/Admin.tsx";
+import Chatbot from "../views/chatbot/Chatbot.tsx";
 
 const AppRoutes = () => {
 
@@ -60,6 +61,7 @@ const AppRoutes = () => {
                 <Route path="/video" element={<Video />} />
                 <Route path="/song/:id" element={<Song />} />
                 <Route path="/admin/Admin" element={<Admin />} />
+                <Route path="/chatbot/" element={<Chatbot/>} />
                 <Route path="*" element={<h1>404 Not Found</h1>} />
                 
             </Routes>
